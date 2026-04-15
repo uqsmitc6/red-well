@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Bug That Lived for Twenty-Seven Years — Field Notes Vol. 1</title>
+<title>The Bug That Lived for Twenty-Seven Years</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -63,13 +63,13 @@
 
   .masthead {
     border-bottom: 1px solid var(--rule);
-    padding: 24px 40px;
+    padding: 22px 40px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: baseline;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--ink-dim);
     position: sticky;
@@ -80,8 +80,6 @@
   }
 
   .masthead .brand { color: var(--accent); font-weight: 500; }
-  .masthead .meta { display: flex; gap: 24px; }
-  .masthead .meta span::before { content: '◆'; margin-right: 8px; color: var(--accent-soft); }
 
   article {
     max-width: 720px;
@@ -133,7 +131,7 @@
     color: var(--ink-soft);
     font-style: italic;
     font-weight: 300;
-    margin-bottom: 40px;
+    margin-bottom: 56px;
     max-width: 600px;
     opacity: 0;
     animation: fadeUp 0.9s ease-out 0.4s forwards;
@@ -161,7 +159,7 @@
     margin: 0 -200px 56px;
     position: relative;
     opacity: 0;
-    animation: fadeUp 1.2s ease-out 0.7s forwards;
+    animation: fadeUp 1.2s ease-out 0.75s forwards;
   }
 
   .hero-figure .image-wrap {
@@ -568,6 +566,18 @@
     font-weight: 500;
   }
 
+  footer a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--ink-faint);
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  footer a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
   .scroll-progress {
     position: fixed;
     top: 0;
@@ -603,8 +613,7 @@
 
   @media (max-width: 640px) {
     body { font-size: 17px; }
-    .masthead { padding: 16px 20px; flex-direction: column; gap: 8px; align-items: flex-start; }
-    .masthead .meta { gap: 16px; flex-wrap: wrap; }
+    .masthead { padding: 16px 20px; }
     article { padding: 48px 20px 80px; }
     .epoch { margin: 56px -20px; }
     .pullquote { font-size: 22px; margin: 48px 0; }
@@ -633,7 +642,7 @@
     align-items: center;
     gap: 18px;
     opacity: 0;
-    animation: fadeUp 0.9s ease-out 0.65s forwards;
+    animation: fadeUp 0.9s ease-out 0.55s forwards;
     position: relative;
   }
 
@@ -764,12 +773,7 @@
 <div class="scroll-progress" id="progress"></div>
 
 <header class="masthead">
-  <div class="brand">◈ FIELD NOTES</div>
-  <div class="meta">
-    <span>Vol. 1 / №01</span>
-    <span>15.04.2026</span>
-    <span>Brisbane</span>
-  </div>
+  <div class="brand">◈ THE NARROW WINDOW</div>
 </header>
 
 <article>
@@ -779,11 +783,6 @@
   <h1>The bug that lived for <em>twenty-seven years</em></h1>
 
   <p class="standfirst">An AI model just found thousands of zero-day vulnerabilities in the software the world runs on. Its creators decided not to release it. Here is why that decision matters more than the model itself.</p>
-
-  <div class="byline">
-    <span>Field Notes</span>
-    <span class="reading-time">5 min read</span>
-  </div>
 
 
   <div class="audio-player" id="audioPlayer">
@@ -910,12 +909,12 @@
   <footer>
     <div class="col">
       <h4>Sources</h4>
-      Anthropic / Glasswing<br>
-      UK AI Safety Institute<br>
-      The Hacker News<br>
-      Schneier on Security<br>
-      Cisco / UPenn Study<br>
-      NIST CAISI Eval
+      <a href="https://www.anthropic.com/glasswing" target="_blank" rel="noopener">Anthropic / Glasswing</a><br>
+      <a href="https://www.aisi.gov.uk/blog/our-evaluation-of-claude-mythos-previews-cyber-capabilities" target="_blank" rel="noopener">UK AI Safety Institute</a><br>
+      <a href="https://thehackernews.com/2026/04/anthropics-claude-mythos-finds.html" target="_blank" rel="noopener">The Hacker News</a><br>
+      <a href="https://www.schneier.com/blog/archives/2026/04/on-anthropics-mythos-preview-and-project-glasswing.html" target="_blank" rel="noopener">Schneier on Security</a><br>
+      <a href="https://blogs.cisco.com/security/evaluating-security-risk-in-deepseek-and-other-frontier-reasoning-models" target="_blank" rel="noopener">Cisco / UPenn Study</a><br>
+      <a href="https://www.nist.gov/news-events/news/2025/09/caisi-evaluation-deepseek-ai-models-finds-shortcomings-and-risks" target="_blank" rel="noopener">NIST CAISI Eval</a>
     </div>
     <div class="col">
       <h4>Filed</h4>
