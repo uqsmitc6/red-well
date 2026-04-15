@@ -793,7 +793,7 @@
     <div class="player-body">
       <div class="player-meta">
         <span class="label">Listen instead</span>
-        <span class="title-text">Narrated read · 5 min</span>
+        <span class="title-text">Narrated read</span>
         <span class="time" id="timeDisplay">0:00 / —:—</span>
       </div>
       <div class="scrubber" id="scrubber">
@@ -948,12 +948,20 @@
   };
 
   let hasPlayed = false;
-  playBtn.addEventListener('click', () => {
+  playBtn.addEventListener('click', async () => {
     if (audio.paused) {
-      // First play: ensure we start from 0 to avoid any preload drift
+      // First play: seek to 0 and wait for it to settle before playing.
+      // Without this, browsers can start playing from a slightly buffered-ahead
+      // position and clip the opening of the audio.
       if (!hasPlayed) {
-        audio.currentTime = 0;
         hasPlayed = true;
+        if (audio.currentTime !== 0) {
+          await new Promise(resolve => {
+            const onSeeked = () => { audio.removeEventListener('seeked', onSeeked); resolve(); };
+            audio.addEventListener('seeked', onSeeked);
+            audio.currentTime = 0;
+          });
+        }
       }
       audio.play().catch(err => console.warn('Audio play failed:', err));
     } else {
