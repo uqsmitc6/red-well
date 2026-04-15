@@ -803,8 +803,8 @@
     <div class="fallback">
       Player not loading? <a href="https://github.com/uqsmitc6/the-lighthouse/blob/main/audio/glass-wing.mp3" target="_blank" rel="noopener">Open on GitHub →</a>
     </div>
-    <audio id="audioEl" preload="metadata">
-      <source src="https://cdn.jsdelivr.net/gh/uqsmitc6/the-lighthouse@main/audio/glass-wing.mp3" type="audio/mpeg">
+    <audio id="audioEl" preload="auto" playsinline>
+      <source src="glass-wing.mp3" type="audio/mpeg">
     </audio>
   </div>
 
@@ -947,8 +947,14 @@
     return `${m}:${sec}`;
   };
 
+  let hasPlayed = false;
   playBtn.addEventListener('click', () => {
     if (audio.paused) {
+      // First play: ensure we start from 0 to avoid any preload drift
+      if (!hasPlayed) {
+        audio.currentTime = 0;
+        hasPlayed = true;
+      }
       audio.play().catch(err => console.warn('Audio play failed:', err));
     } else {
       audio.pause();
