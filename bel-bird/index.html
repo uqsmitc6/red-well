@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Which BEL Bird Are You? - UQ Quiz</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --uq-purple: #51247A;
+            --uq-gold: #FBB800;
+            --dark-purple: #2B1D37;
+            --light-grey: #D7D1CC;
+            --magenta: #962A8B;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--dark-purple) 0%, var(--uq-purple) 100%);
+            color: var(--dark-purple);
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            max-width: 1024px;
+            max-height: 100vh;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, var(--uq-purple) 0%, var(--magenta) 100%);
+            color: var(--white);
+            text-align: center;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--light-grey);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--uq-gold) 0%, var(--magenta) 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            padding: 12px 30px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .screen-welcome {
+            text-align: center;
+        }
+
+        .screen-welcome h2 {
+            font-size: 36px;
+            color: var(--uq-purple);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .screen-welcome p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .screen-welcome .highlights {
+            background: #f0e6ff;
+            border-left: 4px solid var(--uq-gold);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .screen-welcome .highlights strong {
+            color: var(--uq-purple);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--uq-purple) 0%, var(--magenta) 100%);
+            color: var(--white);
+            border: none;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(81, 36, 122, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(81, 36, 122, 0.4);
+        }
+
+        .lead-form {
+            background: #f9f7fc;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark-purple);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--light-grey);
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--uq-purple);
+        }
+
+        .question-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark-purple);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--white);
+            border: 2px solid var(--light-grey);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .option-card:nth-child(1) { animation-delay: 0.05s; }
+        .option-card:nth-child(2) { animation-delay: 0.1s; }
+        .option-card:nth-child(3) { animation-delay: 0.15s; }
+        .option-card:nth-child(4) { animation-delay: 0.2s; }
+        .option-card:nth-child(5) { animation-delay: 0.25s; }
+        .option-card:nth-child(6) { animation-delay: 0.3s; }
+        .option-card:nth-child(7) { animation-delay: 0.35s; }
+        .option-card:nth-child(8) { animation-delay: 0.4s; }
+
+        .option-card.not-really {
+            background: #f5f5f5;
+            border-color: #ddd;
+            opacity: 0.75;
+        }
+
+        .option-card:hover:not(.selected) {
+            border-color: var(--uq-purple);
+            background: #f9f7fc;
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, rgba(81, 36, 122, 0.1), rgba(150, 42, 139, 0.1));
+            border-color: var(--uq-purple);
+            animation: pulse 0.6s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .option-icon {
+            font-size: 32px;
+            margin-right: 16px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .option-card.not-really .option-icon {
+            opacity: 0;
+            display: none;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-label {
+            font-weight: 600;
+            color: var(--dark-purple);
+            font-size: 16px;
+        }
+
+        .option-card.not-really .option-label {
+            color: #999;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* World Map Styles */
+        .world-map-container {
+            position: relative;
+            width: 100%;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+        .world-map-svg {
+            width: 100%;
+            height: auto;
+        }
+        .map-region {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            fill: var(--light-grey);
+            stroke: #fff;
+            stroke-width: 1;
+        }
+        .map-region:hover {
+            fill: #e8d5f5;
+            filter: drop-shadow(0 0 6px rgba(81, 36, 122, 0.3));
+        }
+        .map-region.selected {
+            fill: var(--uq-purple);
+            filter: drop-shadow(0 0 8px rgba(81, 36, 122, 0.5));
+        }
+        .map-label {
+            pointer-events: none;
+            font-size: 11px;
+            font-weight: 700;
+            fill: var(--dark-purple);
+            text-anchor: middle;
+        }
+        .map-region.selected + .map-label,
+        .map-label.selected {
+            fill: #fff;
+        }
+        .map-pin {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .map-pin:hover {
+            transform: scale(1.15);
+        }
+        .map-pin.selected circle {
+            fill: var(--uq-purple);
+            stroke: var(--uq-gold);
+            stroke-width: 2;
+        }
+        .map-stay-home {
+            text-align: center;
+            margin-top: 12px;
+            padding: 10px 24px;
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        .map-stay-home:hover {
+            border-color: var(--uq-purple);
+            color: var(--dark-purple);
+        }
+
+        .transition-screen {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .transition-screen h2 {
+            font-size: 32px;
+            color: var(--uq-purple);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .transition-screen p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+
+        .transition-screen .tap-hint {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 20px;
+        }
+
+        .result-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .bird-svg {
+            width: 180px;
+            height: 180px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-heading {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark-purple);
+            margin-bottom: 12px;
+        }
+
+        .result-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .program-box {
+            background: linear-gradient(135deg, rgba(81, 36, 122, 0.08), rgba(251, 184, 0, 0.08));
+            border: 2px solid var(--uq-purple);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .program-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--magenta);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .program-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--uq-purple);
+            margin-bottom: 12px;
+        }
+
+        .program-major {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .program-headline {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .secondary-program {
+            background: #f9f7fc;
+            border: 1px solid var(--light-grey);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            width: 100%;
+        }
+
+        .secondary-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .secondary-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--uq-purple);
+            margin-bottom: 8px;
+        }
+
+        .secondary-copy {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .rationale-section {
+            background: #fffbf0;
+            border-left: 4px solid var(--uq-gold);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        .rationale-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--magenta);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .rationale-text {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .lifestyle-icons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .lifestyle-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background: #f0e6ff;
+            border-radius: 8px;
+            font-size: 28px;
+            min-width: 50px;
+        }
+
+        .lifestyle-label {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .caveat-section {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            width: 100%;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            width: 100%;
+        }
+
+        .btn-start-over {
+            background: var(--uq-purple);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-start-over:active {
+            transform: scale(0.98);
+        }
+
+        .btn-back {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255,255,255,0.85);
+            border: 1.5px solid var(--light-grey);
+            color: #999;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .btn-back:hover {
+            border-color: var(--uq-purple);
+            color: var(--uq-purple);
+        }
+        .btn-back:active {
+            transform: scale(0.97);
+        }
+
+        .multi-select-hint {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .btn-done {
+            background: var(--uq-purple);
+            color: var(--white);
+            border: none;
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 24px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .btn-done.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .btn-done.active:active {
+            transform: scale(0.97);
+        }
+
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            background: var(--light-grey);
+            border-radius: 8px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            max-width: 300px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 9999;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .special-note {
+            background: #fff3cd;
+            border-left: 4px solid var(--uq-gold);
+            border-radius: 6px;
+            padding: 14px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: #664d03;
+            line-height: 1.5;
+            text-align: left;
+            width: 100%;
+        }
+
+        .inactivity-warning {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            z-index: 5000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @media (max-height: 800px) {
+            .content {
+                padding: 20px;
+            }
+            .question-title {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+            .option-card {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Configuration
+        const MAX_SCORES = { ANA: 13, SOC: 14, DRI: 16, VIS: 14, EXP: 9 };
+
+        const PROGRAM_PROFILES = {
+            BCom:    { ANA: 3, SOC: 0, DRI: 0.5, VIS: 0, EXP: 1.5 },
+            BEcon:   { ANA: 3, SOC: 0, DRI: 1, VIS: 3, EXP: 1 },
+            BBusMan: { ANA: 1, SOC: 3, DRI: 1.5, VIS: 0, EXP: 3 },
+            BTHEM:   { ANA: 0, SOC: 3, DRI: 0, VIS: 0, EXP: 3 },
+            BAdvBus: { ANA: 1.5, SOC: 1.5, DRI: 3, VIS: 1, EXP: 0 },
+            BAFE:    { ANA: 3, SOC: 0, DRI: 3, VIS: 0, EXP: 0 },
+            BPPE:    { ANA: 1.5, SOC: 1.5, DRI: 2.5, VIS: 3, EXP: 0 },
+            Law:     { ANA: 1, SOC: 2.5, DRI: 2.5, VIS: 3, EXP: 0 },
+        };
+
+        const PROGRAM_HEADLINES = {
+            BCom: "Rock-solid technical foundation in finance, accounting, analytics, or information systems.",
+            BEcon: "Queensland's only standalone economics degree — understand why markets crash, governments fail, and people behave irrationally.",
+            BBusMan: "The broadest degree in BEL — 7 majors, 16 dual degree options, maximum flexibility.",
+            BTHEM: "Create experiences — festivals, hotels, sporting events. Perfect timing with Brisbane 2032 Olympics.",
+            BAdvBus: "The Swiss Army knife of honours degrees — 2 majors across 8 specialisations, built-in honours, research or professional pathway.",
+            BAFE: "One of a kind in Australia — half economics, half finance, built for investment banking, economic consulting, fund management.",
+            BPPE: "Combine three disciplines kept separate elsewhere — study the ideas that shape governments and societies. Think Oxford's PPE, in Brisbane.",
+            Law: "Queensland's oldest law school — three former Chief Justices of Australia studied here. Best as a dual degree."
+        };
+
+        const GOWN_COLORS = {
+            BCom: 'purple',
+            BAFE: 'purple',
+            BBusMan: 'blue',
+            BAdvBus: 'blue',
+            BTHEM: 'blue',
+            BEcon: 'green',
+            BPPE: 'green',
+            Law: 'red'
+        };
+
+        const PROGRAM_ACCESSORIES = {
+            BCom: 'calculator',
+            BEcon: 'globe_graph',
+            BBusMan: 'clipboard',
+            BTHEM: 'lanyard',
+            BAdvBus: 'grad_cap_star',
+            BAFE: 'ticker_tape',
+            BPPE: 'ppe_venn',
+            Law: 'barrister_wig'
+        };
+
+        // Questions data
+        const LAYER1_QUESTIONS = [
+            {
+                id: 'Q1',
+                title: "You're stuck in traffic and your mind starts wandering. What do you end up thinking about?",
+                options: [
+                    { text: "I wonder how traffic light timing is actually optimised... there must be an algorithm", scoring: { ANA: 2, EXP: 1 }, icon: "🚦" },
+                    { text: "I'm mentally planning tonight — who's coming, where we're going, what we need", scoring: { SOC: 2, EXP: 1 }, icon: "💬" },
+                    { text: "Why haven't we fixed public transport yet? This city could work so much better", scoring: { VIS: 2, EXP: 1 }, icon: "🚌" },
+                    { text: "I'm mentally redesigning this intersection — I could make it flow better", scoring: { ANA: 1, DRI: 2 }, icon: "🗺️" }
+                ]
+            },
+            {
+                id: 'Q2',
+                title: "You get to design your own school timetable with zero rules. You...",
+                options: [
+                    { text: "Take a bit of everything — art, science, business, languages. Why limit yourself?", scoring: { EXP: 2 }, icon: "🎨" },
+                    { text: "Go deep on 2–3 subjects I'm actually good at and try to be the best in the room", scoring: { DRI: 2 }, icon: "🎯" },
+                    { text: "Pick the subjects that connect to each other — I want to see the bigger picture", scoring: { DRI: 1, VIS: 2 }, icon: "🔗" }
+                ]
+            },
+            {
+                id: 'Q3',
+                title: "It's the end of the year. Which award would you actually want to win?",
+                options: [
+                    { text: "Most Likely to Start a Business Before Graduating", scoring: { SOC: 1, DRI: 2 }, icon: "🚀" },
+                    { text: "Most Likely to Know Everyone's Name in the Room", scoring: { SOC: 2, EXP: 1 }, icon: "🤝" },
+                    { text: "Most Likely to Get Straight A's Without Telling Anyone", scoring: { ANA: 2, DRI: 1 }, icon: "📚" },
+                    { text: "Most Likely to Change a School Policy", scoring: { DRI: 1, VIS: 2 }, icon: "📋" }
+                ]
+            },
+            {
+                id: 'Q4',
+                title: "Your school is losing money on its canteen. The principal asks for ideas. You...",
+                options: [
+                    { text: "Pull the sales data and find out what's actually selling vs what's being thrown out", scoring: { ANA: 2, DRI: 1 }, icon: "📊" },
+                    { text: "Survey students about what they'd actually buy — then pitch a whole new menu", scoring: { SOC: 2, EXP: 1 }, icon: "🍔" },
+                    { text: "Look at what other schools do better and bring in an outside food vendor", scoring: { SOC: 1, DRI: 2 }, icon: "🏪" },
+                    { text: "Question whether a canteen should even be run for profit — maybe it should be subsidised", scoring: { VIS: 2, EXP: 1 }, icon: "💭" }
+                ]
+            },
+            {
+                id: 'Q5',
+                title: "You're planning a fundraiser. The team needs someone to handle each of these. Which one are you grabbing?",
+                options: [
+                    { text: "The budget and ticket pricing — I'll build the spreadsheet and model the scenarios", scoring: { ANA: 2, DRI: 1 }, icon: "💰", mathsProxy: 'strong' },
+                    { text: "The marketing and social media — I'll get people excited and buying tickets", scoring: { SOC: 2, EXP: 1 }, icon: "📱" },
+                    { text: "The logistics and operations — I'll make sure the whole thing actually runs smoothly", scoring: { DRI: 2, EXP: 1 }, icon: "⚙️" },
+                    { text: "The sponsorship pitches — I'll convince local businesses to back us", scoring: { SOC: 1, DRI: 2 }, icon: "🎪" }
+                ]
+            },
+            {
+                id: 'Q6',
+                title: "You're given the power to fix ONE thing about your city. You tackle...",
+                options: [
+                    { text: "The nightlife — more festivals, better events, actual things to do on weekends", scoring: { SOC: 2, EXP: 1 }, icon: "🎉" },
+                    { text: "The economy — attracting better companies, creating more jobs, boosting innovation", scoring: { ANA: 1, DRI: 2 }, icon: "📈" },
+                    { text: "The inequality — fixing housing, transport, and access so it works for everyone", scoring: { VIS: 2, EXP: 1 }, icon: "🏘️" },
+                    { text: "The bureaucracy — the rules are broken and someone needs to untangle them", scoring: { ANA: 1, DRI: 1, VIS: 1 }, icon: "⚖️" }
+                ]
+            },
+            {
+                id: 'Q7',
+                title: "When you're doing your best work, you're usually...",
+                options: [
+                    { text: "In a team — bouncing ideas around, feeding off other people's energy", scoring: { SOC: 2, EXP: 1 }, icon: "👥" },
+                    { text: "Alone with headphones on — deep in a problem, fully locked in", scoring: { ANA: 2, DRI: 1 }, icon: "🎧" },
+                    { text: "In competition — I do my best when I'm trying to beat someone", scoring: { DRI: 2 }, icon: "🏆" },
+                    { text: "Reading or researching — going down a rabbit hole on something I'm fascinated by", scoring: { VIS: 2, EXP: 1 }, icon: "📖" }
+                ]
+            },
+            {
+                id: 'Q8',
+                title: "Fast forward 10 years. You're at a dinner party. How do you answer 'so, what do you do?'",
+                options: [
+                    { text: "I run a team — we're building something big and I get to lead the strategy", scoring: { SOC: 1, DRI: 2 }, icon: "👔" },
+                    { text: "I work with numbers that move markets — it's intense but I love the precision", scoring: { ANA: 2, DRI: 1 }, icon: "📉" },
+                    { text: "I work on problems most people don't even know exist — policy, systems, the big stuff", scoring: { VIS: 2, EXP: 1 }, icon: "🧩" },
+                    { text: "I create experiences — events, brands, places that people remember", scoring: { SOC: 2, EXP: 1 }, icon: "✨" }
+                ]
+            }
+        ];
+
+        const PHASE2_QUESTIONS = [
+            {
+                id: 'L1',
+                title: "Tap where you'd go on exchange",
+                isMap: true,
+                options: [
+                    { text: "Japan", tag: 'japan', image: 'torii_gate', icon: '🇯🇵', label: 'Japan' },
+                    { text: "United Kingdom", tag: 'uk', image: 'union_jack', icon: '🇬🇧', label: 'UK' },
+                    { text: "Europe", tag: 'europe', image: 'eiffel_tower', icon: '🇪🇺', label: 'Europe' },
+                    { text: "North America", tag: 'northamerica', image: 'maple_leaf', icon: '🇺🇸', label: 'North America' },
+                    { text: "East & SE Asia", tag: 'asia', image: 'asian_skyline', icon: '🇰🇷', label: 'Asia' },
+                    { text: "South America", tag: 'south_america', image: 'globe_pin', icon: '🌎', label: 'South America' },
+                    { text: "Middle East & Africa", tag: 'middle_east_africa', image: 'globe_pin', icon: '🌍', label: 'Middle East & Africa' },
+                    { text: "Pacific Islands", tag: 'pacific', image: 'globe_pin', icon: '🏝️', label: 'Pacific' },
+                    { text: "I'd rather stay in Australia", tag: 'stay_au', notReallyMyThing: true }
+                ]
+            },
+            {
+                id: 'L2',
+                multiSelect: true,
+                title: "It's O-Week. You're walking past the club stalls. Which ones catch your eye?",
+                options: [
+                    { text: "SMACK (anime, manga & gaming) or K-pop Society", tag: 'smack', image: 'game_controller', icon: '🎮' },
+                    { text: "Music, performing arts, or karaoke", tag: 'music', image: 'microphone', icon: '🎵' },
+                    { text: "UniDive (scuba diving) or Surfers Club", tag: 'dive', image: 'diving_mask', icon: '🤿' },
+                    { text: "Ski Club (annual international ski trips!)", tag: 'ski', image: 'ski_goggles', icon: '⛷️' },
+                    { text: "Debating Society or UQ Law Society", tag: 'debate', image: 'speech_bubble', icon: '🗣️' },
+                    { text: "Wine and Cheese Club", tag: 'wine', image: 'wine_glass', icon: '🍷' },
+                    { text: "BirdSoc (Ornithological Society) or Bushwalking", tag: 'birdsoc', image: 'binoculars', icon: '🐦' },
+                    { text: "I'll figure it out when I get there", notReallyMyThing: true }
+                ]
+            },
+            {
+                id: 'L3',
+                multiSelect: true,
+                title: "What's your sport vibe? Pick as many as you like.",
+                options: [
+                    { text: "Team ball sports — rugby, soccer, basketball, touch footy, AFL", tag: 'team', image: 'rugby_ball', icon: '🏉' },
+                    { text: "Water sports — swimming, water polo, rowing, sailing, wakeboarding", tag: 'water', image: 'swim_goggles', icon: '🏊' },
+                    { text: "Running, cycling, or triathlon", tag: 'running', image: 'running_shoe', icon: '🏃' },
+                    { text: "Martial arts or combat sports — boxing, judo, karate, taekwondo", tag: 'martial', image: 'boxing_glove', icon: '🥊' },
+                    { text: "Racquet sports — tennis, table tennis, badminton", tag: 'racquet', image: 'tennis_racquet', icon: '🎾' },
+                    { text: "Something different — equestrian, fencing, ultimate frisbee, lacrosse, quadball", tag: 'other_sport', image: 'frisbee', icon: '🐴' },
+                    { text: "Gym and fitness classes — I'm more of a solo workout person", tag: 'gym', image: 'dumbbell', icon: '🧘' },
+                    { text: "Sport's not really my thing", notReallyMyThing: true }
+                ]
+            },
+            {
+                id: 'L4',
+                title: "Every great uni story has a side quest. What's yours?",
+                options: [
+                    { text: "Launch a startup through UQ Ventures", tag: 'startup', image: 'rocket', icon: '🚀' },
+                    { text: "Learn a new language — Spanish, Japanese, Chinese, French, Korean", tag: 'language', image: null, icon: '🌏', subQuestion: true },
+                    { text: "Do a summer research project with a professor", tag: 'research', image: 'microscope', icon: '🔬' },
+                    { text: "Study a completely different subject as electives — psychology, philosophy, design, music", tag: 'electives', image: 'books', icon: '📚' },
+                    { text: "Get involved in student media, politics, or activism", tag: 'media', image: 'megaphone', icon: '🎤' },
+                    { text: "Go for an internship or placement with a top company", tag: 'internship', image: 'briefcase', icon: '🏆' },
+                    { text: "I'll just see where things take me", notReallyMyThing: true }
+                ]
+            },
+            {
+                id: 'L4b',
+                title: "You can study a language as part of your degree — what do you pick?",
+                parent: 'L4',
+                options: [
+                    { text: "Japanese", tag: 'japanese', image: 'hiragana_a', icon: '🇯🇵' },
+                    { text: "Spanish", tag: 'spanish', image: 'hola', icon: '🇪🇸' },
+                    { text: "Chinese (Mandarin)", tag: 'chinese', image: 'nihao', icon: '🇨🇳' },
+                    { text: "French", tag: 'french', image: 'bonjour', icon: '🇫🇷' },
+                    { text: "Korean", tag: 'korean', image: 'annyeong', icon: '🇰🇷' },
+                    { text: "Something else", tag: 'other_language', image: 'language_generic', icon: '🌐' }
+                ]
+            }
+        ];
+
+        // ========================================
+        // LAYER 2: Branch-specific questions (4 per branch)
+        // ========================================
+        const LAYER2_QUESTIONS = {
+            numbers: [
+                {
+                    id: 'N1', title: "Two assignments due. You can only do one properly. Which gets your full effort?",
+                    options: [
+                        { text: "Financial model valuing a real company", scoring: { ANA: 2, DRI: 1 }, icon: "📊" },
+                        { text: "Essay analysing why a government's economic policy failed", scoring: { ANA: 1, VIS: 2 }, icon: "📝" },
+                        { text: "Data dashboard visualising a messy dataset beautifully", scoring: { ANA: 2, EXP: 1 }, icon: "📈" },
+                        { text: "Group case study solving a real problem for a local company", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🤝" }
+                    ]
+                },
+                {
+                    id: 'N2', title: "Imagine two career paths. Which excites you more?",
+                    options: [
+                        { text: "Graduate with broad skills, 3-4 career options, room to pivot", scoring: { ANA: 1, EXP: 2 }, icon: "🔀" },
+                        { text: "Graduate with elite specialist skills, one clear target, shot at the most competitive jobs", scoring: { ANA: 1, DRI: 2 }, icon: "🎯" },
+                        { text: "Graduate with honours and a research thesis, door open to PhD or industry", scoring: { ANA: 1, DRI: 1, VIS: 1 }, icon: "🎓" }
+                    ]
+                },
+                {
+                    id: 'N3', title: "A friend asks you to explain something mathematical. Which could you explain confidently?",
+                    options: [
+                        { text: "How compound interest works", scoring: { ANA: 1, EXP: 1 }, icon: "💰" },
+                        { text: "How to use a spreadsheet to model scenarios", scoring: { ANA: 2, DRI: 1 }, icon: "📋" },
+                        { text: "How probability and statistics predict outcomes", scoring: { ANA: 2, DRI: 1 }, icon: "🎲" },
+                        { text: "How calculus finds the optimal price point", scoring: { ANA: 2, DRI: 2 }, icon: "📐" }
+                    ]
+                },
+                {
+                    id: 'N4', title: "Scrolling business news. Which headline makes you click?",
+                    options: [
+                        { text: "'How this company hid $2B in debt — and the auditor who found it'", scoring: { ANA: 2, DRI: 1 }, icon: "🔍" },
+                        { text: "'The algorithm that beat Wall Street'", scoring: { ANA: 1, DRI: 2 }, icon: "🤖" },
+                        { text: "'Why Australia's central bank just made a decision that affects every household'", scoring: { ANA: 1, VIS: 2 }, icon: "🏛️" },
+                        { text: "'Inside the company that turned data analytics into a $50B business'", scoring: { ANA: 2, EXP: 1 }, icon: "💹" }
+                    ]
+                }
+            ],
+            people: [
+                {
+                    id: 'P1', title: "Two dream internships. Same pay. You pick...",
+                    options: [
+                        { text: "Marketing assistant at a tech startup", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "💻" },
+                        { text: "Event coordinator at a major music festival", scoring: { SOC: 2, EXP: 1 }, icon: "🎪" },
+                        { text: "HR intern at a large company", scoring: { SOC: 2, EXP: 1 }, icon: "👥" },
+                        { text: "Operations assistant at a boutique hotel", scoring: { SOC: 2, EXP: 1 }, icon: "🏨" }
+                    ]
+                },
+                {
+                    id: 'P2', title: "When you imagine travel in your future, it's mostly...",
+                    options: [
+                        { text: "My actual career — travel IS the job", scoring: { SOC: 1, EXP: 2 }, icon: "✈️" },
+                        { text: "A big part of my career — international role", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🌏" },
+                        { text: "Something I do for myself — separate from career", scoring: { SOC: 1, EXP: 1 }, icon: "🧳" },
+                        { text: "Not that important — I'd rather build something here", scoring: { DRI: 2 }, icon: "🏗️" }
+                    ]
+                },
+                {
+                    id: 'P3', title: "Brisbane is hosting the 2032 Olympics. First thought?",
+                    options: [
+                        { text: "'I want to be part of that — logistics, events, hospitality'", scoring: { SOC: 2, EXP: 1 }, icon: "🏅" },
+                        { text: "'So many business opportunities — property, sponsorship, infrastructure'", scoring: { DRI: 2, EXP: 1 }, icon: "📈" },
+                        { text: "'I wonder what the economic impact will actually be'", scoring: { ANA: 1, VIS: 2 }, icon: "🤔" },
+                        { text: "'Cool — but not a career thing for me'", scoring: { SOC: 1, EXP: 1 }, icon: "😎" }
+                    ]
+                },
+                {
+                    id: 'P4', title: "Your actual leadership style?",
+                    options: [
+                        { text: "Everyone feels heard, process matters as much as result", scoring: { SOC: 2, EXP: 1 }, icon: "🤲" },
+                        { text: "Focus on the experience — final product should feel special", scoring: { SOC: 2, EXP: 1 }, icon: "✨" },
+                        { text: "Set the bar high, push everyone including myself", scoring: { DRI: 2 }, icon: "🏋️" },
+                        { text: "Figure out strengths, assign right person to right job", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🧩" }
+                    ]
+                }
+            ],
+            people_drive: [
+                {
+                    id: 'PD1', title: "Two versions of your degree. Which do you pick?",
+                    options: [
+                        { text: "3 years, one major, 8 free electives, 16 dual options", scoring: { SOC: 1, EXP: 2 }, icon: "🔀" },
+                        { text: "4 years, two majors, honours, research or professional pathway", scoring: { DRI: 2 }, icon: "🎓" },
+                        { text: "4 years, one ultra-specialised pathway, exclusive courses", scoring: { ANA: 1, DRI: 2 }, icon: "🎯" }
+                    ]
+                },
+                {
+                    id: 'PD2', title: "You're ambitious. What does that actually mean to you?",
+                    options: [
+                        { text: "Lead — the person the team looks to", scoring: { SOC: 2, DRI: 1 }, icon: "👑" },
+                        { text: "Be technically excellent — the best at what I do", scoring: { ANA: 2, DRI: 1 }, icon: "⚡" },
+                        { text: "Have options — multiple skills, never boxed in", scoring: { SOC: 1, EXP: 2 }, icon: "🔑" },
+                        { text: "The CV that opens any door — honours, top firms", scoring: { DRI: 2 }, icon: "📄" }
+                    ]
+                },
+                {
+                    id: 'PD3', title: "How important is a specific professional qualification (like CPA)?",
+                    options: [
+                        { text: "Really important — I want it to mean something specific", scoring: { ANA: 1, DRI: 1 }, icon: "📜" },
+                        { text: "Somewhat — nice to have but skills matter more", scoring: { SOC: 1, EXP: 1 }, icon: "🤷" },
+                        { text: "Not at all — broad skills, figure out credentials later", scoring: { EXP: 2 }, icon: "🌊" }
+                    ]
+                },
+                {
+                    id: 'PD4', title: "Final year of uni. Two options. Which excites you?",
+                    options: [
+                        { text: "Consulting project with a real company", scoring: { SOC: 1, DRI: 2 }, icon: "🏢" },
+                        { text: "Supervised research thesis on an unanswered question", scoring: { ANA: 1, DRI: 1, VIS: 1 }, icon: "🔬" },
+                        { text: "Industry placement inside a top firm", scoring: { SOC: 1, DRI: 2 }, icon: "🤝" },
+                        { text: "Honestly I'd rather graduate in 3 years", scoring: { EXP: 2 }, icon: "🏃" }
+                    ]
+                }
+            ],
+            ideas: [
+                {
+                    id: 'I1', title: "Two assignments. Which do you want to write?",
+                    options: [
+                        { text: "'Analyse the economic impact of raising minimum wage using real data'", scoring: { ANA: 2, DRI: 1 }, icon: "📊" },
+                        { text: "'Is it morally justifiable to allow billionaires while people are homeless?'", scoring: { VIS: 2, EXP: 1 }, icon: "⚖️" },
+                        { text: "'Compare how three countries designed their healthcare systems'", scoring: { ANA: 1, VIS: 2 }, icon: "🌍" },
+                        { text: "'Model what would happen if we abolished income tax'", scoring: { ANA: 2, VIS: 1 }, icon: "🧮" }
+                    ]
+                },
+                {
+                    id: 'I2', title: "Which learning environment brings out your best?",
+                    options: [
+                        { text: "Small group of 30-40, all deeply passionate, tight-knit", scoring: { SOC: 1, DRI: 1, VIS: 1 }, icon: "🫂" },
+                        { text: "Big program, courses across the whole university", scoring: { EXP: 2 }, icon: "🏫" },
+                        { text: "Structured with clear benchmarks and expectations", scoring: { ANA: 1, DRI: 1 }, icon: "📏" }
+                    ]
+                },
+                {
+                    id: 'I3', title: "Where are you most likely working?",
+                    options: [
+                        { text: "Treasury, Reserve Bank, economic consultancy", scoring: { ANA: 2, DRI: 1, VIS: 1 }, icon: "🏛️" },
+                        { text: "Think tank, NGO, political advisory role", scoring: { SOC: 1, DRI: 1, VIS: 2 }, icon: "💡" },
+                        { text: "University or research institute", scoring: { VIS: 2, EXP: 1 }, icon: "📚" },
+                        { text: "Law firm, court, regulatory body", scoring: { SOC: 2, DRI: 1, VIS: 1 }, icon: "⚖️" }
+                    ]
+                },
+                {
+                    id: 'I4', title: "Which statement resonates with how you think?",
+                    options: [
+                        { text: "'Show me the data — I don't trust an argument that can't be quantified'", scoring: { ANA: 2, DRI: 1 }, icon: "📉" },
+                        { text: "'There are always at least three sides — truth is in the tension between them'", scoring: { VIS: 2, EXP: 1 }, icon: "🔮" },
+                        { text: "'A good argument is about being the most rigorous'", scoring: { SOC: 1, DRI: 1, VIS: 1 }, icon: "🎯" },
+                        { text: "'I'd rather understand one thing deeply than know a little about everything'", scoring: { DRI: 2 }, icon: "🔎" }
+                    ]
+                }
+            ],
+            ideas_social: [
+                {
+                    id: 'IS1', title: "Someone says something you strongly disagree with. Instinct?",
+                    options: [
+                        { text: "Challenge them — respectfully but directly", scoring: { SOC: 2, DRI: 1 }, icon: "🗣️" },
+                        { text: "Ask questions — understand WHY before responding", scoring: { SOC: 1, VIS: 2 }, icon: "❓" },
+                        { text: "Look it up — who's actually right based on evidence", scoring: { ANA: 2, DRI: 1 }, icon: "🔍" },
+                        { text: "Let it go unless it really matters", scoring: { EXP: 2 }, icon: "🤷" }
+                    ]
+                },
+                {
+                    id: 'IS2', title: "An unfair system is hurting people. First instinct?",
+                    options: [
+                        { text: "Find the legal lever to force change", scoring: { SOC: 1, DRI: 2, VIS: 1 }, icon: "⚖️" },
+                        { text: "Study why it exists before deciding what should replace it", scoring: { VIS: 2, EXP: 1 }, icon: "📖" },
+                        { text: "Model what a better system would look like", scoring: { ANA: 2, DRI: 1, VIS: 1 }, icon: "🏗️" },
+                        { text: "Organise people, build a coalition", scoring: { SOC: 2, DRI: 1 }, icon: "✊" }
+                    ]
+                },
+                {
+                    id: 'IS3', title: "Would you study an extra year for TWO complete degrees?",
+                    options: [
+                        { text: "Absolutely — two qualifications for one extra year", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🎯" },
+                        { text: "Depends on the second degree", scoring: { DRI: 1, VIS: 1 }, icon: "🤔" },
+                        { text: "Probably not — I'd rather go deep in one thing", scoring: { DRI: 1, VIS: 1 }, icon: "🔬" },
+                        { text: "No — get into workforce ASAP", scoring: { EXP: 1 }, icon: "🏃" }
+                    ]
+                },
+                {
+                    id: 'IS4', title: "Pick the setting where you'd feel most in your element:",
+                    options: [
+                        { text: "A courtroom — presenting a case under pressure", scoring: { SOC: 2, DRI: 2 }, icon: "🏛️" },
+                        { text: "A policy roundtable — advising a minister", scoring: { SOC: 1, DRI: 1, VIS: 2 }, icon: "🤝" },
+                        { text: "A seminar room — debating with passionate peers", scoring: { SOC: 1, VIS: 2, EXP: 1 }, icon: "💬" },
+                        { text: "A conference stage — presenting a year of research", scoring: { ANA: 1, SOC: 1, DRI: 1, VIS: 1 }, icon: "🎤" }
+                    ]
+                }
+            ],
+            cross_numbers_people: [
+                {
+                    id: 'CP1', title: "Analysing a company's performance. What part do you enjoy?",
+                    options: [
+                        { text: "Building the financial model", scoring: { ANA: 2, DRI: 1 }, icon: "📊" },
+                        { text: "Presenting findings — making numbers tell a story", scoring: { SOC: 2, DRI: 1 }, icon: "🗣️" },
+                        { text: "What the numbers mean for the people who work there", scoring: { SOC: 2, VIS: 1 }, icon: "👥" },
+                        { text: "Using analysis to spot an opportunity nobody else saw", scoring: { ANA: 1, DRI: 2 }, icon: "💡" }
+                    ]
+                },
+                {
+                    id: 'CP2', title: "Most appealing workplace?",
+                    options: [
+                        { text: "Big 4 accounting/consulting firm", scoring: { ANA: 1, DRI: 2 }, icon: "🏢" },
+                        { text: "Startup or scale-up", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🚀" },
+                        { text: "Marketing or brand agency", scoring: { SOC: 2, EXP: 1 }, icon: "🎨" },
+                        { text: "Investment bank or fund manager", scoring: { ANA: 2, DRI: 2 }, icon: "💰" }
+                    ]
+                },
+                {
+                    id: 'CP3', title: "Two versions of your degree. Which do you pick?",
+                    options: [
+                        { text: "3 years, one major, 8 free electives, 16 dual options", scoring: { SOC: 1, EXP: 2 }, icon: "🔀" },
+                        { text: "4 years, two majors, honours, research or professional pathway", scoring: { DRI: 2 }, icon: "🎓" },
+                        { text: "4 years, one ultra-specialised pathway, exclusive courses", scoring: { ANA: 1, DRI: 2 }, icon: "🎯" }
+                    ]
+                },
+                {
+                    id: 'CP4', title: "You're ambitious. What does that actually mean to you?",
+                    options: [
+                        { text: "Lead — the person the team looks to", scoring: { SOC: 2, DRI: 1 }, icon: "👑" },
+                        { text: "Be technically excellent — the best at what I do", scoring: { ANA: 2, DRI: 1 }, icon: "⚡" },
+                        { text: "Have options — multiple skills, never boxed in", scoring: { SOC: 1, EXP: 2 }, icon: "🔑" },
+                        { text: "The CV that opens any door — honours, top firms", scoring: { DRI: 2 }, icon: "📄" }
+                    ]
+                }
+            ],
+            cross_numbers_ideas: [
+                {
+                    id: 'NI1', title: "Two YouTube videos. Which are you clicking?",
+                    options: [
+                        { text: "'Why inflation is a policy choice, not an accident'", scoring: { ANA: 1, VIS: 2 }, icon: "📺" },
+                        { text: "'How this 22-year-old built a $10M portfolio'", scoring: { ANA: 1, DRI: 2 }, icon: "💰" },
+                        { text: "'The hidden economics of Uber Eats — why your driver earns so little'", scoring: { VIS: 2, EXP: 1 }, icon: "🛵" },
+                        { text: "'How Excel crashed the London Whale trade and cost a bank $6B'", scoring: { ANA: 2, DRI: 1 }, icon: "📉" }
+                    ]
+                },
+                {
+                    id: 'NI2', title: "Two assignments. Which do you want to write?",
+                    options: [
+                        { text: "'Analyse the economic impact of raising minimum wage using real data'", scoring: { ANA: 2, DRI: 1 }, icon: "📊" },
+                        { text: "'Is it morally justifiable to allow billionaires while people are homeless?'", scoring: { VIS: 2, EXP: 1 }, icon: "⚖️" },
+                        { text: "'Compare how three countries designed their healthcare systems'", scoring: { ANA: 1, VIS: 2 }, icon: "🌍" },
+                        { text: "'Model what would happen if we abolished income tax'", scoring: { ANA: 2, VIS: 1 }, icon: "🧮" }
+                    ]
+                },
+                {
+                    id: 'NI3', title: "Which learning environment brings out your best?",
+                    options: [
+                        { text: "Small group of 30-40, all deeply passionate, tight-knit", scoring: { SOC: 1, DRI: 1, VIS: 1 }, icon: "🫂" },
+                        { text: "Big program, courses across the whole university", scoring: { EXP: 2 }, icon: "🏫" },
+                        { text: "Structured with clear benchmarks and expectations", scoring: { ANA: 1, DRI: 1 }, icon: "📏" }
+                    ]
+                },
+                {
+                    id: 'NI4', title: "Where are you most likely working?",
+                    options: [
+                        { text: "Treasury, Reserve Bank, economic consultancy", scoring: { ANA: 2, DRI: 1, VIS: 1 }, icon: "🏛️" },
+                        { text: "Think tank, NGO, political advisory role", scoring: { SOC: 1, DRI: 1, VIS: 2 }, icon: "💡" },
+                        { text: "University or research institute", scoring: { VIS: 2, EXP: 1 }, icon: "📚" },
+                        { text: "Law firm, court, regulatory body", scoring: { SOC: 2, DRI: 1, VIS: 1 }, icon: "⚖️" }
+                    ]
+                }
+            ],
+            cross_people_ideas: [
+                {
+                    id: 'PI1', title: "When you see an injustice, your instinct is to...",
+                    options: [
+                        { text: "Argue the case — find precedent, construct argument", scoring: { SOC: 1, DRI: 2, VIS: 1 }, icon: "⚖️" },
+                        { text: "Understand it — research history, read philosophy", scoring: { VIS: 2, EXP: 1 }, icon: "📖" },
+                        { text: "Organise — rally people, build a movement", scoring: { SOC: 2, DRI: 1 }, icon: "✊" },
+                        { text: "Write about it — publish analysis that changes thinking", scoring: { SOC: 1, VIS: 2 }, icon: "✍️" }
+                    ]
+                },
+                {
+                    id: 'PI2', title: "Someone says something you strongly disagree with. Instinct?",
+                    options: [
+                        { text: "Challenge them — respectfully but directly", scoring: { SOC: 2, DRI: 1 }, icon: "🗣️" },
+                        { text: "Ask questions — understand WHY before responding", scoring: { SOC: 1, VIS: 2 }, icon: "❓" },
+                        { text: "Look it up — who's actually right based on evidence", scoring: { ANA: 2, DRI: 1 }, icon: "🔍" },
+                        { text: "Let it go unless it really matters", scoring: { EXP: 2 }, icon: "🤷" }
+                    ]
+                },
+                {
+                    id: 'PI3', title: "An unfair system is hurting people. First instinct?",
+                    options: [
+                        { text: "Find the legal lever to force change", scoring: { SOC: 1, DRI: 2, VIS: 1 }, icon: "⚖️" },
+                        { text: "Study why it exists before deciding what should replace it", scoring: { VIS: 2, EXP: 1 }, icon: "📖" },
+                        { text: "Model what a better system would look like", scoring: { ANA: 2, DRI: 1, VIS: 1 }, icon: "🏗️" },
+                        { text: "Organise people, build a coalition", scoring: { SOC: 2, DRI: 1 }, icon: "✊" }
+                    ]
+                },
+                {
+                    id: 'PI4', title: "Would you study an extra year for TWO complete degrees?",
+                    options: [
+                        { text: "Absolutely — two qualifications for one extra year", scoring: { SOC: 1, DRI: 1, EXP: 1 }, icon: "🎯" },
+                        { text: "Depends on the second degree", scoring: { DRI: 1, VIS: 1 }, icon: "🤔" },
+                        { text: "Probably not — I'd rather go deep in one thing", scoring: { DRI: 1, VIS: 1 }, icon: "🔬" },
+                        { text: "No — get into workforce ASAP", scoring: { EXP: 1 }, icon: "🏃" }
+                    ]
+                }
+            ]
+        };
+
+        // ========================================
+        // LAYER 3: Honing questions (pair-specific)
+        // ========================================
+        const LAYER3_QUESTIONS = {
+            H_CONFIRM: [
+                {
+                    id: 'H_CONFIRM', title: "Which best describes what you want from uni?",
+                    options: [
+                        { text: "Flexibility — try things, explore", scoring: { EXP: 2 }, icon: "🌊" },
+                        { text: "Depth — get really good at something", scoring: { DRI: 2 }, icon: "🔬" },
+                        { text: "Connection — meet people, build networks", scoring: { SOC: 2 }, icon: "🤝" },
+                        { text: "Understanding — learn how the world works", scoring: { VIS: 2 }, icon: "🌍" }
+                    ]
+                }
+            ],
+            BCom_BAFE: [
+                {
+                    id: 'H_BCF1', title: "If your dream job doesn't work out, how important is a clear Plan B?",
+                    options: [
+                        { text: "Very — I want multiple career options", scoring: { EXP: 2 }, icon: "🔀" },
+                        { text: "Not important — I'd rather go all-in", scoring: { DRI: 2 }, icon: "🎯" }
+                    ]
+                },
+                {
+                    id: 'H_BCF2', title: "How much do you care about studying subjects outside your main field?",
+                    options: [
+                        { text: "A lot — I want room to explore", scoring: { EXP: 2 }, icon: "🌈" },
+                        { text: "A little", scoring: {}, icon: "🤷" },
+                        { text: "Not at all — deeper into my specialisation", scoring: { DRI: 1, ANA: 1 }, icon: "🎯" }
+                    ]
+                },
+                {
+                    id: 'H_BCF3', title: "Which LinkedIn label would you be most proud of?",
+                    options: [
+                        { text: "'Bachelor of Commerce (Finance), UQ'", scoring: { ANA: 1, EXP: 1 }, icon: "📜" },
+                        { text: "'Bachelor of Advanced Finance and Economics (Honours), UQ'", scoring: { DRI: 2 }, icon: "🏆" }
+                    ]
+                }
+            ],
+            BBusMan_BTHEM: [
+                {
+                    id: 'H_BT1', title: "Is your career in a specific industry or could it be ANY industry?",
+                    options: [
+                        { text: "Specific — I know my industry", scoring: { SOC: 1, EXP: 1 }, icon: "🎪" },
+                        { text: "Any industry — I want transferable skills", scoring: { SOC: 1, DRI: 1 }, icon: "🔄" }
+                    ]
+                },
+                {
+                    id: 'H_BT2', title: "Pick the day that sounds more like your future:",
+                    options: [
+                        { text: "Office morning, client meeting, strategy session, networking drinks", scoring: { SOC: 1, DRI: 1 }, icon: "🏢" },
+                        { text: "Site visit, briefing vendors, troubleshooting AV, watching 5,000 people walk in", scoring: { SOC: 1, EXP: 1 }, icon: "🎉" }
+                    ]
+                }
+            ],
+            BAdvBus_BBusMan: [
+                {
+                    id: 'H_AB1', title: "Honours takes 4 years instead of 3. Extra year = second major, honours, capstone. Worth it?",
+                    options: [
+                        { text: "Yes — the distinction matters", scoring: { DRI: 2 }, icon: "🎓" },
+                        { text: "Maybe — depends if employers care", scoring: { DRI: 1 }, icon: "🤔" },
+                        { text: "Probably not — graduate earlier, get started", scoring: { EXP: 2 }, icon: "🏃" }
+                    ]
+                },
+                {
+                    id: 'H_AB2', title: "Business AND journalism as dual degree, or TWO business majors at honours level?",
+                    options: [
+                        { text: "The dual — breadth across different fields", scoring: { EXP: 2 }, icon: "🔀" },
+                        { text: "Two business majors — excellent at two related things", scoring: { DRI: 2 }, icon: "🎯" }
+                    ]
+                }
+            ],
+            BAdvBus_BAFE: [
+                {
+                    id: 'H_AF1', title: "Specialist vs versatile honours graduate. Who gets hired?",
+                    options: [
+                        { text: "The specialist", scoring: { ANA: 1, DRI: 1 }, icon: "🔬" },
+                        { text: "The versatile one", scoring: { SOC: 1, DRI: 1 }, icon: "🔄" },
+                        { text: "Depends on the job", scoring: {}, icon: "🤷" }
+                    ]
+                },
+                {
+                    id: 'H_AF2', title: "How important is professional accreditation like CPA?",
+                    options: [
+                        { text: "Important — I want that option", scoring: { ANA: 1 }, icon: "📜" },
+                        { text: "Not important — not interested in accounting", scoring: { DRI: 1 }, icon: "🚫" }
+                    ]
+                }
+            ],
+            BEcon_BPPE: [
+                {
+                    id: 'H_EP1', title: "Understanding a complex issue — do you reach for...",
+                    options: [
+                        { text: "Data and models — show me the numbers", scoring: { ANA: 2 }, icon: "📊" },
+                        { text: "Arguments and reasoning — hear each side, think it through", scoring: { VIS: 2 }, icon: "💭" }
+                    ]
+                },
+                {
+                    id: 'H_EP2', title: "Large diverse cohort or small exclusive group?",
+                    options: [
+                        { text: "Large and diverse — maximum flexibility", scoring: { EXP: 2 }, icon: "🌊" },
+                        { text: "Small and intense — deep with passionate people", scoring: { DRI: 1, VIS: 1 }, icon: "🔥" }
+                    ]
+                }
+            ],
+            BPPE_Law: [
+                {
+                    id: 'H_PL1', title: "What matters more: winning an argument or understanding all sides?",
+                    options: [
+                        { text: "Winning", scoring: { SOC: 1, DRI: 1 }, icon: "🏆" },
+                        { text: "Understanding", scoring: { VIS: 2 }, icon: "💭" }
+                    ]
+                },
+                {
+                    id: 'H_PL2', title: "Which workplace?",
+                    options: [
+                        { text: "Law firm or court", scoring: { SOC: 1, DRI: 1 }, icon: "⚖️" },
+                        { text: "Policy institute or government advisory role", scoring: { VIS: 1, DRI: 1 }, icon: "🏛️" }
+                    ]
+                }
+            ],
+            BEcon_Law: [
+                {
+                    id: 'H_EL1', title: "Laws and regulations are...",
+                    options: [
+                        { text: "Systems to be modelled and understood", scoring: { ANA: 2 }, icon: "🧮" },
+                        { text: "Instruments to be wielded for justice", scoring: { SOC: 1, DRI: 1 }, icon: "⚖️" }
+                    ]
+                },
+                {
+                    id: 'H_EL2', title: "Ideal career: more time with numbers or words?",
+                    options: [
+                        { text: "Mostly numbers", scoring: { ANA: 2 }, icon: "🔢" },
+                        { text: "Mostly words", scoring: { SOC: 1, VIS: 1 }, icon: "📝" },
+                        { text: "Genuine mix", scoring: {}, icon: "⚖️" }
+                    ]
+                }
+            ],
+            BCom_BEcon: [
+                {
+                    id: 'H_CE1', title: "Which excites you more?",
+                    options: [
+                        { text: "Working inside a company — managing its money", scoring: { ANA: 1, DRI: 1 }, icon: "🏢" },
+                        { text: "Advising governments — understanding economic systems", scoring: { ANA: 1, VIS: 1 }, icon: "🏛️" }
+                    ]
+                },
+                {
+                    id: 'H_CE2', title: "When someone says 'economics' you think of...",
+                    options: [
+                        { text: "Business — supply/demand, markets, competition", scoring: { ANA: 1 }, icon: "📈" },
+                        { text: "Society — inequality, trade, development", scoring: { VIS: 2 }, icon: "🌍" }
+                    ]
+                }
+            ],
+            BBusMan_Law: [
+                {
+                    id: 'H_ML1', title: "Two ways to make a difference. Which pulls more?",
+                    options: [
+                        { text: "Leading a team through a challenge", scoring: { SOC: 1, DRI: 1 }, icon: "👥" },
+                        { text: "Arguing a case that changes someone's life", scoring: { SOC: 1, VIS: 1 }, icon: "⚖️" }
+                    ]
+                },
+                {
+                    id: 'H_ML2', title: "Law = 5yr dual, BBusMan = 3yr. Does time difference matter?",
+                    options: [
+                        { text: "5 years is a lot — get started sooner", scoring: { EXP: 2 }, icon: "🏃" },
+                        { text: "5 years worth it for two degrees", scoring: { DRI: 1, VIS: 1 }, icon: "🎓" }
+                    ]
+                }
+            ],
+            BAdvBus_Law: [
+                {
+                    id: 'H_AL1', title: "Business honours with two majors, or Law with business dual?",
+                    options: [
+                        { text: "Business honours — lead organisations, not argue cases", scoring: { SOC: 1, DRI: 1 }, icon: "👑" },
+                        { text: "Law with business — legal reasoning AND business knowledge", scoring: { VIS: 1, DRI: 1 }, icon: "⚖️" }
+                    ]
+                },
+                {
+                    id: 'H_AL2', title: "More energy from building a strategy or winning an argument?",
+                    options: [
+                        { text: "Building a strategy", scoring: { DRI: 2 }, icon: "🗺️" },
+                        { text: "Winning an argument", scoring: { SOC: 1, DRI: 1 }, icon: "🏆" }
+                    ]
+                }
+            ],
+            BCom_BBusMan: [
+                {
+                    id: 'H_CB1', title: "Future job — mostly working with...",
+                    options: [
+                        { text: "Spreadsheets, databases, financial models", scoring: { ANA: 2 }, icon: "📊" },
+                        { text: "Teams, clients, stakeholders", scoring: { SOC: 2 }, icon: "👥" },
+                        { text: "Genuine mix", scoring: {}, icon: "⚖️" }
+                    ]
+                },
+                {
+                    id: 'H_CB2', title: "Most interesting thing to study?",
+                    options: [
+                        { text: "How to value a company and decide whether to invest", scoring: { ANA: 1, DRI: 1 }, icon: "💰" },
+                        { text: "How to build a brand people care about", scoring: { SOC: 2 }, icon: "🎨" },
+                        { text: "How to recruit and develop the best people", scoring: { SOC: 1, DRI: 1 }, icon: "👥" },
+                        { text: "How to spot patterns in data nobody else sees", scoring: { ANA: 2 }, icon: "🔍" }
+                    ]
+                }
+            ]
+        };
+
+        // ========================================
+        // BRANCHING & HONING LOGIC
+        // ========================================
+        function selectBranch(scores) {
+            const numbersAffinity = scores.ANA * 1.2;
+            const peopleAffinity = scores.SOC + (scores.EXP * 0.5);
+            const ideasAffinity = scores.VIS * 1.2;
+            const driveSignal = scores.DRI;
+
+            const affinities = [
+                { family: 'numbers', score: numbersAffinity },
+                { family: 'people', score: peopleAffinity },
+                { family: 'ideas', score: ideasAffinity },
+            ].sort((a, b) => b.score - a.score);
+
+            const gap = affinities[0].score - affinities[1].score;
+
+            if (gap <= 2) {
+                const pair = [affinities[0].family, affinities[1].family].sort().join('+');
+                if (pair === 'numbers+people') return 'cross_numbers_people';
+                if (pair === 'ideas+numbers') return 'cross_numbers_ideas';
+                if (pair === 'ideas+people') return 'cross_people_ideas';
+            }
+
+            if (affinities[0].family === 'numbers') return 'numbers';
+            if (affinities[0].family === 'people') {
+                return driveSignal >= 4 ? 'people_drive' : 'people';
+            }
+            if (affinities[0].family === 'ideas') {
+                return scores.SOC >= 3 ? 'ideas_social' : 'ideas';
+            }
+            return 'people';
+        }
+
+        function selectHoningQuestions(programRankings) {
+            const top1 = programRankings[0];
+            const top2 = programRankings[1];
+            const gap = top1.score - top2.score;
+
+            if (gap > 0.15) return { pair: null, questions: LAYER3_QUESTIONS['H_CONFIRM'] };
+
+            const pair = [top1.program, top2.program].sort().join('_');
+            const honingMap = {
+                'BCom_BAFE': 'BCom_BAFE',
+                'BBusMan_BTHEM': 'BBusMan_BTHEM',
+                'BAdvBus_BBusMan': 'BAdvBus_BBusMan',
+                'BAdvBus_BAFE': 'BAdvBus_BAFE',
+                'BEcon_BPPE': 'BEcon_BPPE',
+                'BPPE_Law': 'BPPE_Law',
+                'BEcon_Law': 'BEcon_Law',
+                'BCom_BEcon': 'BCom_BEcon',
+                'BBusMan_Law': 'BBusMan_Law',
+                'BAdvBus_Law': 'BAdvBus_Law',
+                'BCom_BBusMan': 'BCom_BBusMan',
+            };
+
+            const key = honingMap[pair];
+            if (key && LAYER3_QUESTIONS[key]) {
+                return { pair: pair, questions: LAYER3_QUESTIONS[key] };
+            }
+            return { pair: null, questions: LAYER3_QUESTIONS['H_CONFIRM'] };
+        }
+
+        // SVG Bird Illustrations
+        const IbisSVG = () => (
+            <svg viewBox="0 0 200 240" className="bird-svg">
+                <defs>
+                    <linearGradient id="ibisGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#51247A" />
+                        <stop offset="100%" stopColor="#962A8B" />
+                    </linearGradient>
+                </defs>
+                {/* Body */}
+                <ellipse cx="100" cy="120" rx="45" ry="55" fill="url(#ibisGradient)" opacity="0.9" />
+                {/* Head */}
+                <circle cx="100" cy="50" r="28" fill="url(#ibisGradient)" opacity="0.9" />
+                {/* Eye */}
+                <circle cx="108" cy="45" r="4" fill="#FBB800" />
+                <circle cx="109" cy="44" r="2" fill="#2B1D37" />
+                {/* Long curved beak */}
+                <path d="M 115 52 Q 140 55 150 45" stroke="url(#ibisGradient)" strokeWidth="6" fill="none" strokeLinecap="round" />
+                {/* Neck */}
+                <path d="M 105 78 Q 102 95 100 110" stroke="url(#ibisGradient)" strokeWidth="18" fill="none" opacity="0.8" />
+                {/* Legs */}
+                <line x1="90" y1="170" x2="85" y2="220" stroke="url(#ibisGradient)" strokeWidth="5" />
+                <line x1="110" y1="170" x2="115" y2="220" stroke="url(#ibisGradient)" strokeWidth="5" />
+                {/* Feet */}
+                <circle cx="85" cy="220" r="6" fill="url(#ibisGradient)" />
+                <circle cx="115" cy="220" r="6" fill="url(#ibisGradient)" />
+                {/* Wing detail */}
+                <path d="M 75 110 Q 65 125 70 150" stroke="#FBB800" strokeWidth="3" fill="none" opacity="0.6" strokeLinecap="round" />
+                {/* Sparkle */}
+                <text x="130" y="80" fontSize="20" opacity="0.7">✨</text>
+            </svg>
+        );
+
+        const TurkeySVG = () => (
+            <svg viewBox="0 0 200 240" className="bird-svg">
+                <defs>
+                    <linearGradient id="turkeyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#51247A" />
+                        <stop offset="100%" stopColor="#962A8B" />
+                    </linearGradient>
+                </defs>
+                {/* Main body */}
+                <ellipse cx="95" cy="130" rx="50" ry="60" fill="url(#turkeyGradient)" opacity="0.9" />
+                {/* Head */}
+                <circle cx="95" cy="45" r="25" fill="url(#turkeyGradient)" opacity="0.9" />
+                {/* Snood (red part under head) */}
+                <path d="M 85 68 Q 80 75 85 85 Q 95 90 105 85 Q 110 75 105 68" fill="#FF6B6B" opacity="0.7" />
+                {/* Beak */}
+                <path d="M 110 45 L 130 43 L 110 50 Z" fill="#FFB347" />
+                {/* Eye */}
+                <circle cx="105" cy="40" r="4" fill="#FBB800" />
+                <circle cx="106" cy="39" r="2" fill="#2B1D37" />
+                {/* Tail feathers (fan shape) */}
+                <path d="M 50 130 Q 20 80 30 50 Q 25 100 35 150" stroke="#FBB800" strokeWidth="4" fill="none" opacity="0.6" />
+                <path d="M 45 130 Q 15 90 25 55 Q 22 110 40 160" stroke="#FBB800" strokeWidth="4" fill="none" opacity="0.6" />
+                <path d="M 40 135 Q 10 100 20 60 Q 18 120 45 170" stroke="#FBB800" strokeWidth="4" fill="none" opacity="0.6" />
+                {/* Legs */}
+                <line x1="85" y1="185" x2="80" y2="230" stroke="url(#turkeyGradient)" strokeWidth="5" />
+                <line x1="105" y1="185" x2="110" y2="230" stroke="url(#turkeyGradient)" strokeWidth="5" />
+                {/* Feet */}
+                <circle cx="80" cy="230" r="6" fill="url(#turkeyGradient)" />
+                <circle cx="110" cy="230" r="6" fill="url(#turkeyGradient)" />
+                {/* Determination indicator */}
+                <text x="50" y="100" fontSize="24" opacity="0.7">⚡</text>
+            </svg>
+        );
+
+        const HybridSVG = () => (
+            <svg viewBox="0 0 200 240" className="bird-svg">
+                <defs>
+                    <linearGradient id="hybridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#51247A" />
+                        <stop offset="100%" stopColor="#962A8B" />
+                    </linearGradient>
+                </defs>
+                {/* Hybrid body (rounder than turkey, longer neck than ibis) */}
+                <ellipse cx="100" cy="125" rx="48" ry="58" fill="url(#hybridGradient)" opacity="0.9" />
+                {/* Head */}
+                <circle cx="100" cy="50" r="26" fill="url(#hybridGradient)" opacity="0.9" />
+                {/* Curved beak (ibis-like) */}
+                <path d="M 115 55 Q 145 58 155 48" stroke="url(#hybridGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
+                {/* Small snood (turkey-like) */}
+                <path d="M 90 70 Q 87 76 92 82 Q 100 85 108 82 Q 113 76 110 70" fill="#FF9999" opacity="0.5" />
+                {/* Eye */}
+                <circle cx="108" cy="48" r="4" fill="#FBB800" />
+                <circle cx="109" cy="47" r="2" fill="#2B1D37" />
+                {/* Hybrid tail (small fan) */}
+                <path d="M 60 120 Q 35 90 45 60" stroke="#FBB800" strokeWidth="3" fill="none" opacity="0.5" />
+                <path d="M 55 130 Q 30 105 40 75" stroke="#FBB800" strokeWidth="3" fill="none" opacity="0.5" />
+                {/* Longer neck */}
+                <path d="M 103 75 Q 101 95 100 110" stroke="url(#hybridGradient)" strokeWidth="16" fill="none" opacity="0.8" />
+                {/* Legs */}
+                <line x1="90" y1="180" x2="85" y2="225" stroke="url(#hybridGradient)" strokeWidth="5" />
+                <line x1="110" y1="180" x2="115" y2="225" stroke="url(#hybridGradient)" strokeWidth="5" />
+                {/* Feet */}
+                <circle cx="85" cy="225" r="6" fill="url(#hybridGradient)" />
+                <circle cx="115" cy="225" r="6" fill="url(#hybridGradient)" />
+                {/* Dual nature indicator */}
+                <text x="130" y="90" fontSize="22" opacity="0.6">⚡</text>
+                <text x="65" y="100" fontSize="22" opacity="0.6">✨</text>
+            </svg>
+        );
+
+        // Utility Functions
+        function calculateScoresFromQuestions(questions, answers) {
+            const scores = { ANA: 0, SOC: 0, DRI: 0, VIS: 0, EXP: 0 };
+            questions.forEach(q => {
+                if (answers[q.id] !== null && answers[q.id] !== undefined) {
+                    const option = q.options[answers[q.id]];
+                    if (option && option.scoring) {
+                        Object.entries(option.scoring).forEach(([dim, points]) => {
+                            scores[dim] += points;
+                        });
+                    }
+                }
+            });
+            return scores;
+        }
+
+        function calculateAllScores(allAnswers, branchQuestions, honingQuestions) {
+            const scores = { ANA: 0, SOC: 0, DRI: 0, VIS: 0, EXP: 0 };
+            const addScores = (questions) => {
+                questions.forEach(q => {
+                    if (allAnswers[q.id] !== null && allAnswers[q.id] !== undefined) {
+                        const option = q.options[allAnswers[q.id]];
+                        if (option && option.scoring) {
+                            Object.entries(option.scoring).forEach(([dim, points]) => {
+                                scores[dim] += points;
+                            });
+                        }
+                    }
+                });
+            };
+            addScores(LAYER1_QUESTIONS);
+            if (branchQuestions) addScores(branchQuestions);
+            if (honingQuestions) addScores(honingQuestions);
+            return scores;
+        }
+
+        function determineBird(scores) {
+            const ibisScore = scores.SOC + scores.EXP;
+            const turkeyScore = scores.ANA + scores.DRI;
+            if (ibisScore > turkeyScore + 2) return { bird: 'ibis', tied: false };
+            if (turkeyScore > ibisScore + 2) return { bird: 'turkey', tied: false };
+            return { bird: Math.random() > 0.5 ? 'ibis' : 'turkey', tied: true };
+        }
+
+        function normaliseScores(scores) {
+            const normalised = {};
+            Object.entries(scores).forEach(([dim, score]) => {
+                normalised[dim] = (score / MAX_SCORES[dim]) * 3;
+            });
+            return normalised;
+        }
+
+        function cosineSimilarity(vec1, vec2) {
+            const dims = ['ANA', 'SOC', 'DRI', 'VIS', 'EXP'];
+            let dotProduct = 0, mag1 = 0, mag2 = 0;
+            dims.forEach(d => {
+                dotProduct += (vec1[d] || 0) * (vec2[d] || 0);
+                mag1 += (vec1[d] || 0) ** 2;
+                mag2 += (vec2[d] || 0) ** 2;
+            });
+            return dotProduct / (Math.sqrt(mag1) * Math.sqrt(mag2));
+        }
+
+        function findPrograms(scores) {
+            const normalised = normaliseScores(scores);
+            const similarities = Object.entries(PROGRAM_PROFILES).map(([prog, profile]) => ({
+                program: prog,
+                similarity: cosineSimilarity(normalised, profile)
+            })).sort((a, b) => b.similarity - a.similarity);
+
+            const primary = similarities[0].program;
+            const secondary = similarities[1].program;
+            const tertiary = similarities[2].program;
+
+            const tertiaryIncluded = similarities[2].similarity >= similarities[0].similarity * 0.9;
+
+            return { primary, secondary, tertiary: tertiaryIncluded ? tertiary : null, allSimilarities: similarities };
+        }
+
+        function getMajorSuggestion(program, scores) {
+            const thresholds = {
+                high: (dim) => scores[dim] > MAX_SCORES[dim] * 0.65,
+                moderate: (dim) => scores[dim] >= MAX_SCORES[dim] * 0.25 && scores[dim] <= MAX_SCORES[dim] * 0.65,
+                low: (dim) => scores[dim] < MAX_SCORES[dim] * 0.25
+            };
+
+            switch (program) {
+                case 'BCom':
+                    if (thresholds.high('ANA') && thresholds.low('DRI')) return 'Accounting';
+                    if (thresholds.high('ANA') && thresholds.moderate('EXP')) return 'Business Analytics';
+                    if (thresholds.high('ANA') && !thresholds.high('DRI') && thresholds.low('VIS')) return 'Business Information Systems';
+                    return 'Finance';
+                case 'BEcon':
+                    if (thresholds.high('ANA')) return 'Quantitative Analysis';
+                    if (thresholds.high('VIS') && thresholds.moderate('SOC')) return 'Economics of Strategy and Behaviour';
+                    return 'Economics and Public Policy';
+                case 'BBusMan':
+                    if (thresholds.high('SOC') && thresholds.high('DRI')) return 'Innovation & Entrepreneurship';
+                    if (thresholds.high('SOC') && thresholds.moderate('DRI')) return 'Leadership & Management Science';
+                    if (thresholds.high('SOC') && thresholds.moderate('EXP')) return 'Human Resources';
+                    return 'Marketing';
+                case 'BTHEM':
+                    if (thresholds.high('SOC') && thresholds.low('EXP')) return 'Hotel and Hospitality Management';
+                    return 'Tourism and Event Management';
+                case 'BAdvBus':
+                    if (thresholds.high('ANA') && thresholds.high('DRI')) return ['Accounting', 'Finance'];
+                    if (thresholds.high('SOC') && thresholds.high('DRI')) return ['Marketing', 'Innovation & Entrepreneurship'];
+                    return ['Marketing', 'Finance'];
+                case 'BAFE':
+                    if (thresholds.moderate('VIS')) return 'Economics';
+                    return 'Finance';
+                case 'BPPE':
+                    if (thresholds.high('VIS') && thresholds.moderate('ANA')) return 'Economics';
+                    if (thresholds.high('VIS') && thresholds.high('SOC')) return 'Politics';
+                    if (thresholds.high('VIS') && thresholds.low('ANA')) return 'Philosophy';
+                    return 'Combination of all three';
+                case 'Law':
+                    if (thresholds.high('ANA')) return 'paired with BCom';
+                    if (thresholds.high('VIS')) return 'paired with BEcon';
+                    if (thresholds.high('EXP')) return 'paired with Arts';
+                    return 'paired with BBusMan';
+                default:
+                    return null;
+            }
+        }
+
+        function generateRationale(scores, primaryProgram) {
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const top1 = sorted[0][0];
+            const top2 = sorted[1][0];
+
+            const dimensionDescriptions = {
+                ANA: "you're drawn to numbers, data, and working out how systems tick",
+                SOC: "you're a people person who thrives on connection and collaboration",
+                DRI: "you've got serious drive — you want to go deep and be the best at what you do",
+                VIS: "you think big-picture — you care about ideas, policy, and how the world works",
+                EXP: "you love variety and keeping your options open"
+            };
+
+            const programReasons = {
+                BCom: "The Bachelor of Commerce gives you a rock-solid technical foundation in finance, accounting, analytics, or information systems — with room for 8 free electives to explore other interests.",
+                BEcon: "The Bachelor of Economics is Queensland's only standalone economics degree — it's for people who want to understand why markets crash, governments make bad decisions, and people behave irrationally.",
+                BBusMan: "The Bachelor of Business Management is the broadest degree in BEL — 7 majors, 16 dual degree options, and maximum flexibility to find your lane while keeping every door open.",
+                BTHEM: "The Bachelor of Tourism, Hospitality and Event Management is for people who create experiences — festivals, hotels, sporting events. And with Brisbane hosting the 2032 Olympics, your timing is perfect.",
+                BAdvBus: "The Bachelor of Advanced Business (Honours) is the Swiss Army knife of honours degrees — up to 2 majors across 8 specialisations, built-in honours, and a choice of professional or research pathway in your final year. It's not the backup — it's the most versatile honours program in the faculty.",
+                BAFE: "The Bachelor of Advanced Finance and Economics (Honours) is one of a kind in Australia — half economics, half finance, with 50% of courses you can't take anywhere else. It's built for a very specific career path: investment banking, economic consulting, fund management, the Reserve Bank.",
+                BPPE: "The Bachelor of Politics, Philosophy and Economics (Honours) combines three disciplines that most degrees keep separate. You'll study with a small cohort of big thinkers, debating the ideas that shape governments and societies. Think Oxford's PPE, but in Brisbane.",
+                Law: "UQ Law is Queensland's oldest and most respected law school — three former Chief Justices of Australia studied here. It's best studied as a dual degree, so you'll graduate with two qualifications and twice the career options."
+            };
+
+            let rationale = `Your answers showed that ${dimensionDescriptions[top1]}`;
+            if (top2 && scores[top2] > 0) {
+                rationale += `, and ${dimensionDescriptions[top2]}`;
+            }
+            rationale += `. ${programReasons[primaryProgram]}`;
+            return rationale;
+        }
+
+        // Interactive World Map Component for L1 Exchange Question
+        function WorldMap({ onSelect, selectedIdx }) {
+            const [hoveredRegion, setHoveredRegion] = useState(null);
+
+            // Region definitions with SVG paths (simplified world map)
+            const regions = [
+                { idx: 0, id: 'japan', label: 'Japan', labelX: 780, labelY: 205, color: '#e8405a' },
+                { idx: 1, id: 'uk', label: 'UK', labelX: 430, labelY: 145, color: '#1a3a6b' },
+                { idx: 2, id: 'europe', label: 'Europe', labelX: 480, labelY: 175, color: '#2e5ea6' },
+                { idx: 3, id: 'northamerica', label: 'North America', labelX: 200, labelY: 170, color: '#c85028' },
+                { idx: 4, id: 'asia', label: 'East & SE Asia', labelX: 720, labelY: 240, color: '#d4a017' },
+                { idx: 5, id: 'south_america', label: 'South America', labelX: 265, labelY: 340, color: '#2d8f4e' },
+                { idx: 6, id: 'middle_east_africa', label: 'Middle East & Africa', labelX: 500, labelY: 290, color: '#b5651d' },
+                { idx: 7, id: 'pacific', label: 'Pacific Islands', labelX: 830, labelY: 340, color: '#0097a7' },
+            ];
+
+            return React.createElement('div', { className: 'world-map-container' },
+                React.createElement('svg', {
+                    viewBox: '0 0 900 440',
+                    className: 'world-map-svg',
+                    style: { maxHeight: '380px' }
+                },
+                    // Ocean background
+                    React.createElement('rect', { x: 0, y: 0, width: 900, height: 440, fill: '#f0f4f8', rx: 16 }),
+                    // Placeholder watermark
+                    React.createElement('text', {
+                        x: 450, y: 425, textAnchor: 'middle',
+                        style: { fontSize: '10px', fill: '#bbb', fontStyle: 'italic' }
+                    }, 'Placeholder — illustrated map coming soon'),
+
+                    // Simplified continent shapes
+                    // North America
+                    React.createElement('path', {
+                        d: 'M120,80 L160,60 L220,55 L270,70 L290,90 L300,120 L280,160 L260,190 L240,210 L220,220 L195,230 L180,250 L160,260 L140,240 L110,210 L90,180 L80,140 L90,100 Z',
+                        className: `map-region ${selectedIdx === 3 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 3 ? '#51247A' : hoveredRegion === 3 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(3),
+                        onMouseEnter: () => setHoveredRegion(3),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Central America + Caribbean
+                    React.createElement('path', {
+                        d: 'M160,260 L180,255 L200,260 L215,270 L220,280 L210,290 L190,285 L170,275 Z',
+                        className: `map-region ${selectedIdx === 3 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 3 ? '#51247A' : hoveredRegion === 3 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(3),
+                        onMouseEnter: () => setHoveredRegion(3),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // South America
+                    React.createElement('path', {
+                        d: 'M220,285 L250,280 L280,290 L300,310 L310,340 L300,370 L280,390 L260,400 L240,395 L225,375 L220,350 L210,320 L215,300 Z',
+                        className: `map-region ${selectedIdx === 5 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 5 ? '#51247A' : hoveredRegion === 5 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(5),
+                        onMouseEnter: () => setHoveredRegion(5),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // UK & Ireland
+                    React.createElement('path', {
+                        d: 'M415,110 L425,100 L435,105 L440,120 L435,135 L425,140 L418,130 L412,120 Z',
+                        className: `map-region ${selectedIdx === 1 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 1 ? '#51247A' : hoveredRegion === 1 ? '#e8d5f5' : '#bbb' },
+                        onClick: () => onSelect(1),
+                        onMouseEnter: () => setHoveredRegion(1),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Europe (mainland)
+                    React.createElement('path', {
+                        d: 'M430,120 L460,105 L510,100 L550,110 L560,130 L555,155 L540,170 L520,175 L490,180 L470,185 L450,178 L435,165 L430,145 Z',
+                        className: `map-region ${selectedIdx === 2 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 2 ? '#51247A' : hoveredRegion === 2 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(2),
+                        onMouseEnter: () => setHoveredRegion(2),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Africa + Middle East
+                    React.createElement('path', {
+                        d: 'M430,195 L460,185 L500,190 L540,195 L560,180 L580,190 L575,210 L560,230 L540,250 L530,275 L520,300 L510,330 L500,350 L485,365 L470,360 L460,340 L445,310 L435,280 L430,250 L425,220 Z',
+                        className: `map-region ${selectedIdx === 6 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 6 ? '#51247A' : hoveredRegion === 6 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(6),
+                        onMouseEnter: () => setHoveredRegion(6),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Russia / Central Asia (part of broader Asia, clickable as Europe or Asia context)
+                    React.createElement('path', {
+                        d: 'M555,100 L600,85 L660,80 L720,85 L760,95 L780,110 L770,130 L740,140 L700,145 L660,150 L620,155 L580,155 L560,140 Z',
+                        className: `map-region ${selectedIdx === 4 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 4 ? '#51247A' : hoveredRegion === 4 ? '#e8d5f5' : '#ccc' },
+                        onClick: () => onSelect(4),
+                        onMouseEnter: () => setHoveredRegion(4),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // South & Southeast Asia
+                    React.createElement('path', {
+                        d: 'M620,180 L660,170 L700,175 L730,190 L740,210 L730,235 L710,250 L685,255 L660,248 L640,235 L625,215 L615,195 Z',
+                        className: `map-region ${selectedIdx === 4 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 4 ? '#51247A' : hoveredRegion === 4 ? '#e8d5f5' : '#D7D1CC' },
+                        onClick: () => onSelect(4),
+                        onMouseEnter: () => setHoveredRegion(4),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Japan
+                    React.createElement('path', {
+                        d: 'M770,155 L780,150 L790,155 L795,170 L790,190 L782,200 L775,195 L770,180 L768,165 Z',
+                        className: `map-region ${selectedIdx === 0 ? 'selected' : ''}`,
+                        style: { fill: selectedIdx === 0 ? '#51247A' : hoveredRegion === 0 ? '#e8d5f5' : '#e8b5b5' },
+                        onClick: () => onSelect(0),
+                        onMouseEnter: () => setHoveredRegion(0),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Australia (clickable — "I'd rather stay in Australia")
+                    React.createElement('path', {
+                        d: 'M720,310 L760,300 L800,305 L830,320 L840,340 L830,360 L810,370 L780,375 L750,365 L730,350 L720,330 Z',
+                        className: `map-region ${selectedIdx === 8 ? 'selected' : ''}`,
+                        style: {
+                            fill: selectedIdx === 8 ? '#51247A' : hoveredRegion === 8 ? '#e8d5f5' : '#FBB800',
+                            stroke: '#51247A', strokeWidth: 2,
+                            cursor: 'pointer'
+                        },
+                        onClick: () => onSelect(8),
+                        onMouseEnter: () => setHoveredRegion(8),
+                        onMouseLeave: () => setHoveredRegion(null)
+                    }),
+                    // Label on Australia
+                    React.createElement('text', {
+                        x: 780, y: 338, textAnchor: 'middle',
+                        style: { fontSize: '9px', fill: selectedIdx === 8 ? '#FBB800' : '#51247A', fontWeight: 700, pointerEvents: 'none' }
+                    }, selectedIdx === 8 ? 'Staying here!' : "I'd rather stay"),
+                    React.createElement('text', {
+                        x: 780, y: 352, textAnchor: 'middle',
+                        style: { fontSize: '9px', fill: selectedIdx === 8 ? '#FBB800' : '#51247A', fontWeight: 700, pointerEvents: 'none' }
+                    }, selectedIdx === 8 ? '✦' : 'in Australia ✦'),
+                    // Pacific Islands
+                    React.createElement('g', {
+                        className: `map-pin ${selectedIdx === 7 ? 'selected' : ''}`,
+                        onClick: () => onSelect(7),
+                        onMouseEnter: () => setHoveredRegion(7),
+                        onMouseLeave: () => setHoveredRegion(null),
+                        style: { cursor: 'pointer' }
+                    },
+                        React.createElement('circle', { cx: 855, cy: 310, r: 8, fill: selectedIdx === 7 ? '#51247A' : hoveredRegion === 7 ? '#e8d5f5' : '#0097a7', stroke: selectedIdx === 7 ? '#FBB800' : '#fff', strokeWidth: 2 }),
+                        React.createElement('circle', { cx: 870, cy: 295, r: 5, fill: selectedIdx === 7 ? '#51247A' : hoveredRegion === 7 ? '#e8d5f5' : '#0097a7', stroke: selectedIdx === 7 ? '#FBB800' : '#fff', strokeWidth: 1.5 }),
+                        React.createElement('circle', { cx: 848, cy: 290, r: 4, fill: selectedIdx === 7 ? '#51247A' : hoveredRegion === 7 ? '#e8d5f5' : '#0097a7', stroke: selectedIdx === 7 ? '#FBB800' : '#fff', strokeWidth: 1.5 })
+                    ),
+
+                    // Region labels
+                    ...regions.map(r =>
+                        React.createElement('text', {
+                            key: r.id + '-label',
+                            x: r.labelX, y: r.labelY,
+                            textAnchor: 'middle',
+                            className: `map-label ${selectedIdx === r.idx ? 'selected' : ''}`,
+                            style: {
+                                fontSize: r.id === 'japan' || r.id === 'uk' || r.id === 'pacific' ? '10px' : '11px',
+                                fill: selectedIdx === r.idx ? '#FBB800' : '#2B1D37',
+                                fontWeight: hoveredRegion === r.idx || selectedIdx === r.idx ? 800 : 600,
+                                textShadow: selectedIdx === r.idx ? '0 0 4px rgba(81,36,122,0.5)' : 'none'
+                            }
+                        }, r.label)
+                    )
+                ),
+                // (Australia on the map serves as the "stay" option)
+            );
+        }
+
+        // Main App Component
+        function BELBirdQuiz() {
+            const [screen, setScreen] = useState('welcome');
+            const [studentName, setStudentName] = useState('');
+            const [studentEmail, setStudentEmail] = useState('');
+            const [allAnswers, setAllAnswers] = useState({});
+            const [phase2Answers, setPhase2Answers] = useState({});
+            const [mathsProxy, setMathsProxy] = useState('neutral');
+            const [showDebug, setShowDebug] = useState(false);
+            const [inactivityWarning, setInactivityWarning] = useState(false);
+
+            // Branching state
+            const [selectedBranch, setSelectedBranch] = useState(null);
+            const [branchQuestions, setBranchQuestions] = useState([]);
+            const [honingData, setHoningData] = useState({ pair: null, questions: [] });
+            const [scoresAfterLayer1, setScoresAfterLayer1] = useState(null);
+            const [scoresAfterLayer2, setScoresAfterLayer2] = useState(null);
+            const [questionSequence, setQuestionSequence] = useState([]);
+
+            const inactivityTimer = useRef(null);
+            const debugTripleClick = useRef(0);
+
+            // Get current scores from all answered questions
+            const getCurrentScores = () => {
+                return calculateAllScores(allAnswers, branchQuestions, honingData.questions);
+            };
+
+            const handleMathsProxy = (questionId, optionIndex) => {
+                if (questionId === 'Q5' && LAYER1_QUESTIONS[4].options[optionIndex]?.mathsProxy) {
+                    setMathsProxy('strong');
+                }
+            };
+
+            // ---- LAYER 1 HANDLERS ----
+            const handleLayer1Answer = (questionId, optionIndex) => {
+                handleMathsProxy(questionId, optionIndex);
+                setAllAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+                setQuestionSequence(prev => [...prev.filter(id => id !== questionId), questionId]);
+                resetInactivityTimer();
+            };
+
+            // Called when Layer 1 completes — determines branch
+            const completeLayer1 = () => {
+                const l1Scores = calculateScoresFromQuestions(LAYER1_QUESTIONS, allAnswers);
+                setScoresAfterLayer1({ ...l1Scores });
+                const branch = selectBranch(l1Scores);
+                setSelectedBranch(branch);
+                const bQuestions = LAYER2_QUESTIONS[branch] || [];
+                setBranchQuestions(bQuestions);
+                setScreen('transition-1');
+            };
+
+            // ---- LAYER 2 HANDLERS ----
+            const handleLayer2Answer = (questionId, optionIndex) => {
+                setAllAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+                setQuestionSequence(prev => [...prev.filter(id => id !== questionId), questionId]);
+                resetInactivityTimer();
+            };
+
+            // Called when Layer 2 completes — determines honing
+            const completeLayer2 = () => {
+                const l2Scores = calculateAllScores(allAnswers, branchQuestions, []);
+                setScoresAfterLayer2({ ...l2Scores });
+
+                // Calculate program rankings to determine honing
+                const normalised = normaliseScores(l2Scores);
+                const rankings = Object.entries(PROGRAM_PROFILES).map(([prog, profile]) => ({
+                    program: prog,
+                    score: cosineSimilarity(normalised, profile)
+                })).sort((a, b) => b.score - a.score);
+
+                const honing = selectHoningQuestions(rankings);
+                setHoningData(honing);
+                setScreen('transition-2');
+            };
+
+            // ---- LAYER 3 HANDLERS ----
+            const handleLayer3Answer = (questionId, optionIndex) => {
+                setAllAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+                setQuestionSequence(prev => [...prev.filter(id => id !== questionId), questionId]);
+                resetInactivityTimer();
+            };
+
+            const completeLayer3 = () => {
+                setScreen('transition-3');
+            };
+
+            // ---- PHASE 2 HANDLERS (unchanged from v3) ----
+            const handlePhase2Answer = (questionId, optionIndex) => {
+                const option = PHASE2_QUESTIONS.find(q => q.id === questionId)?.options[optionIndex];
+                if (option?.subQuestion) {
+                    setPhase2Answers(prev => ({ ...prev, [questionId]: optionIndex }));
+                    setScreen('L4b');
+                } else {
+                    setPhase2Answers(prev => ({ ...prev, [questionId]: optionIndex }));
+                    const currentIdx = PHASE2_QUESTIONS.findIndex(q => q.id === questionId);
+                    const nextQIdx = currentIdx + 1;
+                    const nextQ = nextQIdx < PHASE2_QUESTIONS.length ? PHASE2_QUESTIONS[nextQIdx] : null;
+                    if (nextQ && nextQ.id !== 'L4b') {
+                        setScreen(nextQ.id);
+                    } else {
+                        showResultsScreen();
+                    }
+                }
+                resetInactivityTimer();
+            };
+
+            const handleL4bAnswer = (optionIndex) => {
+                setPhase2Answers(prev => ({ ...prev, 'L4b': optionIndex }));
+                showResultsScreen();
+                resetInactivityTimer();
+            };
+
+            const handleMultiSelectToggle = (questionId, optionIndex) => {
+                const current = Array.isArray(phase2Answers[questionId]) ? [...phase2Answers[questionId]] : [];
+                const question = PHASE2_QUESTIONS.find(q => q.id === questionId);
+                const option = question?.options[optionIndex];
+
+                if (option?.notReallyMyThing) {
+                    setPhase2Answers(prev => ({ ...prev, [questionId]: [optionIndex] }));
+                    resetInactivityTimer();
+                    return;
+                }
+
+                const notReallyIdx = question?.options.findIndex(o => o.notReallyMyThing);
+                const filtered = current.filter(i => i !== notReallyIdx);
+
+                if (filtered.includes(optionIndex)) {
+                    setPhase2Answers(prev => ({ ...prev, [questionId]: filtered.filter(i => i !== optionIndex) }));
+                } else {
+                    setPhase2Answers(prev => ({ ...prev, [questionId]: [...filtered, optionIndex] }));
+                }
+                resetInactivityTimer();
+            };
+
+            const handleMultiSelectDone = (questionId) => {
+                const currentIdx = PHASE2_QUESTIONS.findIndex(q => q.id === questionId);
+                const nextQIdx = currentIdx + 1;
+                const nextQ = nextQIdx < PHASE2_QUESTIONS.length ? PHASE2_QUESTIONS[nextQIdx] : null;
+                if (nextQ && nextQ.id !== 'L4b') {
+                    setScreen(nextQ.id);
+                } else {
+                    showResultsScreen();
+                }
+                resetInactivityTimer();
+            };
+
+            function showResultsScreen() {
+                setScreen('result');
+            }
+
+            // ---- BACK BUTTON ----
+            const handleBack = () => {
+                resetInactivityTimer();
+                // Layer 1
+                if (screen === 'Q1') {
+                    setScreen('leadCapture');
+                } else if (screen.startsWith('Q')) {
+                    const qIdx = parseInt(screen[1]);
+                    setScreen(`Q${qIdx - 1}`);
+                }
+                // Transitions
+                else if (screen === 'transition-1') {
+                    setScreen('Q8');
+                } else if (screen === 'transition-2') {
+                    setScreen('B4');
+                } else if (screen === 'transition-3') {
+                    const hQuestions = honingData.questions;
+                    if (hQuestions.length > 0) {
+                        setScreen(`H${hQuestions.length}`);
+                    } else {
+                        setScreen('transition-2');
+                    }
+                }
+                // Layer 2
+                else if (screen === 'B1') {
+                    setScreen('transition-1');
+                } else if (screen.startsWith('B')) {
+                    const bIdx = parseInt(screen[1]);
+                    setScreen(`B${bIdx - 1}`);
+                }
+                // Layer 3
+                else if (screen === 'H1') {
+                    setScreen('transition-2');
+                } else if (screen.startsWith('H') && screen !== 'result') {
+                    const hIdx = parseInt(screen[1]);
+                    setScreen(`H${hIdx - 1}`);
+                }
+                // Phase 2
+                else if (screen === 'L1') {
+                    setScreen('transition-3');
+                } else if (screen === 'L4b') {
+                    setScreen('L4');
+                } else if (screen.startsWith('L')) {
+                    const currentIdx = PHASE2_QUESTIONS.findIndex(q => q.id === screen);
+                    if (currentIdx > 0) {
+                        setScreen(PHASE2_QUESTIONS[currentIdx - 1].id);
+                    }
+                }
+            };
+
+            // ---- UTILITIES ----
+            function resetInactivityTimer() {
+                if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+                setInactivityWarning(false);
+                inactivityTimer.current = setTimeout(() => {
+                    if (screen !== 'welcome' && screen !== 'result') {
+                        setInactivityWarning(true);
+                        setTimeout(() => handleStartOver(), 2000);
+                    }
+                }, 45000);
+            }
+
+            function handleStartOver() {
+                setScreen('welcome');
+                setStudentName('');
+                setStudentEmail('');
+                setAllAnswers({});
+                setPhase2Answers({});
+                setMathsProxy('neutral');
+                setSelectedBranch(null);
+                setBranchQuestions([]);
+                setHoningData({ pair: null, questions: [] });
+                setScoresAfterLayer1(null);
+                setScoresAfterLayer2(null);
+                setQuestionSequence([]);
+                if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+            }
+
+            const handleHeaderClick = () => {
+                debugTripleClick.current++;
+                setTimeout(() => { debugTripleClick.current = 0; }, 500);
+                if (debugTripleClick.current === 3) {
+                    setShowDebug(!showDebug);
+                    debugTripleClick.current = 0;
+                }
+            };
+
+            // ---- PROGRESS BAR ----
+            const getProgress = () => {
+                if (screen.startsWith('Q')) {
+                    const qIdx = parseInt(screen[1]);
+                    return { percent: (qIdx / 8) * 25, label: 'Getting to know you...' };
+                }
+                if (screen === 'transition-1') return { percent: 25, label: 'Getting to know you...' };
+                if (screen.startsWith('B')) {
+                    const bIdx = parseInt(screen[1]);
+                    return { percent: 25 + (bIdx / 4) * 25, label: 'Narrowing it down...' };
+                }
+                if (screen === 'transition-2') return { percent: 50, label: 'Narrowing it down...' };
+                if (screen.startsWith('H')) {
+                    const hIdx = parseInt(screen[1]);
+                    const total = honingData.questions.length || 1;
+                    return { percent: 50 + (hIdx / total) * 25, label: 'Almost there...' };
+                }
+                if (screen === 'transition-3') return { percent: 75, label: 'Almost there...' };
+                if (screen.startsWith('L')) {
+                    const progressIdx = screen === 'L4b' ? 5 : parseInt(screen[1]);
+                    return { percent: 75 + (progressIdx / 5) * 25, label: 'Building your UQ life' };
+                }
+                return { percent: 0, label: '' };
+            };
+
+            // ---- KEYBOARD SHORTCUTS ----
+            useEffect(() => {
+                const handleKeyPress = (e) => {
+                    // Layer 1
+                    if (screen.startsWith('Q')) {
+                        const qIdx = parseInt(screen[1]);
+                        const q = LAYER1_QUESTIONS[qIdx - 1];
+                        if (e.key >= '1' && e.key <= '4') {
+                            const optionIdx = parseInt(e.key) - 1;
+                            if (optionIdx < q.options.length) {
+                                handleLayer1Answer(q.id, optionIdx);
+                                if (qIdx === 8) {
+                                    setTimeout(() => completeLayer1(), 400);
+                                } else {
+                                    setTimeout(() => setScreen(`Q${qIdx + 1}`), 400);
+                                }
+                            }
+                        }
+                        if (e.key === 'Backspace') handleBack();
+                    }
+                    // Layer 2
+                    else if (screen.startsWith('B')) {
+                        const bIdx = parseInt(screen[1]);
+                        const q = branchQuestions[bIdx - 1];
+                        if (q && e.key >= '1' && e.key <= '4') {
+                            const optionIdx = parseInt(e.key) - 1;
+                            if (optionIdx < q.options.length) {
+                                handleLayer2Answer(q.id, optionIdx);
+                                if (bIdx === 4) {
+                                    setTimeout(() => completeLayer2(), 400);
+                                } else {
+                                    setTimeout(() => setScreen(`B${bIdx + 1}`), 400);
+                                }
+                            }
+                        }
+                        if (e.key === 'Backspace') handleBack();
+                    }
+                    // Layer 3
+                    else if (screen.startsWith('H')) {
+                        const hIdx = parseInt(screen[1]);
+                        const q = honingData.questions[hIdx - 1];
+                        if (q && e.key >= '1' && e.key <= '4') {
+                            const optionIdx = parseInt(e.key) - 1;
+                            if (optionIdx < q.options.length) {
+                                handleLayer3Answer(q.id, optionIdx);
+                                if (hIdx >= honingData.questions.length) {
+                                    setTimeout(() => completeLayer3(), 400);
+                                } else {
+                                    setTimeout(() => setScreen(`H${hIdx + 1}`), 400);
+                                }
+                            }
+                        }
+                        if (e.key === 'Backspace') handleBack();
+                    }
+                    // Phase 2
+                    else if (screen.startsWith('L')) {
+                        const qId = screen;
+                        const q = PHASE2_QUESTIONS.find(qq => qq.id === qId);
+                        if (q && e.key >= '1' && e.key <= '8') {
+                            const optionIdx = parseInt(e.key) - 1;
+                            if (optionIdx < q.options.length) {
+                                if (q.multiSelect) {
+                                    handleMultiSelectToggle(q.id, optionIdx);
+                                } else {
+                                    handlePhase2Answer(q.id, optionIdx);
+                                }
+                            }
+                        }
+                        if (q && (e.key === 'n' || e.key === 'N')) {
+                            const notReallyIdx = q.options.findIndex(o => o.notReallyMyThing);
+                            if (notReallyIdx >= 0) {
+                                if (q.multiSelect) {
+                                    handleMultiSelectToggle(q.id, notReallyIdx);
+                                } else {
+                                    handlePhase2Answer(q.id, notReallyIdx);
+                                }
+                            }
+                        }
+                        if (q && q.multiSelect && (e.code === 'Enter' || e.code === 'Space')) {
+                            const selections = Array.isArray(phase2Answers[qId]) ? phase2Answers[qId] : [];
+                            if (selections.length > 0) handleMultiSelectDone(qId);
+                        }
+                        if (e.key === 'Backspace') handleBack();
+                    }
+                    // Transitions
+                    else if (screen.startsWith('transition') || screen === 'result') {
+                        if (e.code === 'Space') {
+                            if (screen === 'transition-1') setScreen('B1');
+                            else if (screen === 'transition-2') setScreen('H1');
+                            else if (screen === 'transition-3') setScreen('L1');
+                            else if (screen === 'result') handleStartOver();
+                        }
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyPress);
+                if (screen !== 'welcome' && screen !== 'result') {
+                    resetInactivityTimer();
+                }
+                return () => window.removeEventListener('keydown', handleKeyPress);
+            }, [screen, allAnswers, phase2Answers, branchQuestions, honingData]);
+
+            // Auto-advance transitions
+            useEffect(() => {
+                if (screen.startsWith('transition')) {
+                    const timer = setTimeout(() => {
+                        if (screen === 'transition-1') setScreen('B1');
+                        else if (screen === 'transition-2') setScreen('H1');
+                        else if (screen === 'transition-3') setScreen('L1');
+                    }, 2000);
+                    return () => clearTimeout(timer);
+                }
+            }, [screen]);
+
+            // ---- DEBUG PANEL ----
+            const renderDebug = () => {
+                if (!showDebug) return null;
+                const scores = getCurrentScores();
+                return (
+                    <div style={{
+                        position: 'fixed', bottom: 0, left: 0, right: 0,
+                        background: 'rgba(0,0,0,0.9)', color: '#0f0', fontSize: '11px',
+                        padding: '8px 12px', fontFamily: 'monospace', zIndex: 100,
+                        maxHeight: '120px', overflow: 'auto'
+                    }}>
+                        <strong>DEBUG</strong> | Screen: {screen} | Branch: {selectedBranch || 'none'} | Honing: {honingData.pair || 'none'}
+                        <br/>ANA:{scores.ANA}/{MAX_SCORES.ANA} SOC:{scores.SOC}/{MAX_SCORES.SOC} DRI:{scores.DRI}/{MAX_SCORES.DRI} VIS:{scores.VIS}/{MAX_SCORES.VIS} EXP:{scores.EXP}/{MAX_SCORES.EXP}
+                        <br/>Maths: {mathsProxy} | Qs answered: {questionSequence.length} | Seq: {questionSequence.join(',')}
+                    </div>
+                );
+            };
+
+            // =============================================
+            // SCREEN RENDERING
+            // =============================================
+
+            // WELCOME
+            if (screen === 'welcome') {
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>UQ Open Day Quiz</p>
+                        </div>
+                        <div className="content screen-welcome">
+                            <h2>Ready to find your perfect program?</h2>
+                            <p>Answer a few quick questions about your personality, ambitions, and what makes you tick.</p>
+                            <div className="highlights">
+                                <strong>What you'll discover:</strong><br/>
+                                ✓ Your BEL match (8 programs, one's right for you)<br/>
+                                ✓ Your major suggestion<br/>
+                                ✓ Why UQ works for your style
+                            </div>
+                            <button className="btn-primary" onClick={() => {
+                                setScreen('leadCapture');
+                                resetInactivityTimer();
+                            }}>
+                                Let's Go 🚀
+                            </button>
+                        </div>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // LEAD CAPTURE
+            if (screen === 'leadCapture') {
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Quick intro</p>
+                        </div>
+                        <div className="content">
+                            <h2 style={{ fontSize: '24px', marginBottom: '24px', color: '#51247A' }}>Let's get to know you</h2>
+                            <div className="lead-form">
+                                <div className="form-group">
+                                    <label>Your name</label>
+                                    <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Your name" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Your email</label>
+                                    <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} placeholder="your.email@example.com" />
+                                </div>
+                            </div>
+                            <button className="btn-primary" onClick={() => {
+                                if (studentName && studentEmail) {
+                                    setScreen('Q1');
+                                    resetInactivityTimer();
+                                }
+                            }}>
+                                Continue to Quiz
+                            </button>
+                        </div>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // LAYER 1: Universal questions (Q1-Q8)
+            if (screen.startsWith('Q')) {
+                const qIdx = parseInt(screen[1]) - 1;
+                const question = LAYER1_QUESTIONS[qIdx];
+                const progress = getProgress();
+
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Phase 1: Your Personality</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${progress.percent}%` }}></div>
+                        </div>
+                        <div className="progress-text">{progress.label}</div>
+                        <div className="content">
+                            <h2 className="question-title">{question.title}</h2>
+                            <div className="options-container">
+                                {question.options.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`option-card ${allAnswers[question.id] === idx ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            handleLayer1Answer(question.id, idx);
+                                            if (qIdx === 7) {
+                                                setTimeout(() => completeLayer1(), 400);
+                                            } else {
+                                                setTimeout(() => setScreen(`Q${qIdx + 2}`), 400);
+                                            }
+                                        }}
+                                    >
+                                        <div className="option-icon">{option.icon}</div>
+                                        <div className="option-content">
+                                            <div className="option-label">{option.text}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // TRANSITION 1: Layer 1 → Layer 2
+            if (screen === 'transition-1') {
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Narrowing it down...</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: '25%' }}></div>
+                        </div>
+                        <div className="content transition-screen">
+                            <h2>Great start! 🎯</h2>
+                            <p>We're getting a feel for what makes you tick. Now let's dig a little deeper...</p>
+                            <p className="tap-hint">Tap to continue (or wait 2 seconds...)</p>
+                            <button className="btn-primary" onClick={() => setScreen('B1')}>
+                                Keep Going
+                            </button>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // LAYER 2: Branch-specific questions (B1-B4)
+            if (screen.startsWith('B')) {
+                const bIdx = parseInt(screen[1]) - 1;
+                const question = branchQuestions[bIdx];
+                if (!question) { setScreen('transition-2'); return null; }
+                const progress = getProgress();
+
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Phase 2: Narrowing Down</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${progress.percent}%` }}></div>
+                        </div>
+                        <div className="progress-text">{progress.label}</div>
+                        <div className="content">
+                            <h2 className="question-title">{question.title}</h2>
+                            <div className="options-container">
+                                {question.options.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`option-card ${allAnswers[question.id] === idx ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            handleLayer2Answer(question.id, idx);
+                                            if (bIdx === 3) {
+                                                setTimeout(() => completeLayer2(), 400);
+                                            } else {
+                                                setTimeout(() => setScreen(`B${bIdx + 2}`), 400);
+                                            }
+                                        }}
+                                    >
+                                        <div className="option-icon">{option.icon}</div>
+                                        <div className="option-content">
+                                            <div className="option-label">{option.text}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // TRANSITION 2: Layer 2 → Layer 3
+            if (screen === 'transition-2') {
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Almost there...</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: '50%' }}></div>
+                        </div>
+                        <div className="content transition-screen">
+                            <h2>Nearly there! ✨</h2>
+                            <p>Just a couple more to lock in your perfect match...</p>
+                            <p className="tap-hint">Tap to continue (or wait 2 seconds...)</p>
+                            <button className="btn-primary" onClick={() => setScreen('H1')}>
+                                Final Stretch
+                            </button>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // LAYER 3: Honing questions (H1-H4, variable count)
+            if (screen.startsWith('H') && screen !== 'result') {
+                const hIdx = parseInt(screen[1]) - 1;
+                const question = honingData.questions[hIdx];
+                if (!question) { completeLayer3(); return null; }
+                const progress = getProgress();
+
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Phase 3: The Decider</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${progress.percent}%` }}></div>
+                        </div>
+                        <div className="progress-text">{progress.label}</div>
+                        <div className="content">
+                            <h2 className="question-title">{question.title}</h2>
+                            <div className="options-container">
+                                {question.options.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`option-card ${allAnswers[question.id] === idx ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            handleLayer3Answer(question.id, idx);
+                                            if (hIdx >= honingData.questions.length - 1) {
+                                                setTimeout(() => completeLayer3(), 400);
+                                            } else {
+                                                setTimeout(() => setScreen(`H${hIdx + 2}`), 400);
+                                            }
+                                        }}
+                                    >
+                                        <div className="option-icon">{option.icon}</div>
+                                        <div className="option-content">
+                                            <div className="option-label">{option.text}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // TRANSITION 3: Layer 3 → Phase 2 Lifestyle
+            if (screen === 'transition-3') {
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Building your UQ life</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: '75%' }}></div>
+                        </div>
+                        <div className="content transition-screen">
+                            <h2>Nice one! 🎉</h2>
+                            <p>Now let's figure out what YOUR UQ life looks like.</p>
+                            <p className="tap-hint">Tap to continue (or wait 2 seconds...)</p>
+                            <button className="btn-primary" onClick={() => setScreen('L1')}>
+                                Tell Me About Your UQ Life
+                            </button>
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // PHASE 2: Lifestyle questions (L1-L4b) — unchanged from v3
+            if (screen.startsWith('L')) {
+                const qId = screen;
+                const question = PHASE2_QUESTIONS.find(q => q.id === qId);
+                const progress = getProgress();
+                const isMulti = question.multiSelect;
+                const multiSelections = isMulti && Array.isArray(phase2Answers[qId]) ? phase2Answers[qId] : [];
+
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Which BEL Bird Are You?</h1>
+                            <p>Your UQ Life</p>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${progress.percent}%` }}></div>
+                        </div>
+                        <div className="progress-text">{progress.label}</div>
+                        <div className="content">
+                            <h2 className="question-title">{question.title}</h2>
+                            {isMulti && <p className="multi-select-hint">Tap as many as you like, then hit Done</p>}
+                            {question.isMap ? (
+                                <WorldMap
+                                    onSelect={(idx) => {
+                                        setPhase2Answers(prev => ({ ...prev, [qId]: idx }));
+                                        resetInactivityTimer();
+                                        setTimeout(() => {
+                                            const currentIdx = PHASE2_QUESTIONS.findIndex(q => q.id === qId);
+                                            const nextQIdx = currentIdx + 1;
+                                            const nextQ = nextQIdx < PHASE2_QUESTIONS.length ? PHASE2_QUESTIONS[nextQIdx] : null;
+                                            if (nextQ && nextQ.id !== 'L4b') {
+                                                setScreen(nextQ.id);
+                                            } else {
+                                                showResultsScreen();
+                                            }
+                                        }, 600);
+                                    }}
+                                    selectedIdx={phase2Answers[qId]}
+                                />
+                            ) : (
+                            <div className="options-container">
+                                {question.options.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`option-card ${option.notReallyMyThing ? 'not-really' : ''} ${
+                                            isMulti
+                                                ? multiSelections.includes(idx) ? 'selected' : ''
+                                                : qId === 'L4b'
+                                                    ? phase2Answers['L4b'] === idx ? 'selected' : ''
+                                                    : phase2Answers[qId] === idx ? 'selected' : ''
+                                        }`}
+                                        onClick={() => {
+                                            if (isMulti) {
+                                                handleMultiSelectToggle(qId, idx);
+                                            } else if (qId === 'L4b') {
+                                                handleL4bAnswer(idx);
+                                            } else {
+                                                handlePhase2Answer(qId, idx);
+                                            }
+                                        }}
+                                    >
+                                        <div className="option-icon">{option.icon}</div>
+                                        <div className="option-content">
+                                            <div className="option-label">{option.text}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            )}
+                            {isMulti && (
+                                <button
+                                    className={`btn-done ${multiSelections.length > 0 ? 'active' : ''}`}
+                                    onClick={() => handleMultiSelectDone(qId)}
+                                >
+                                    Done ✓
+                                </button>
+                            )}
+                        </div>
+                        <button className="btn-back" onClick={handleBack}>← Back</button>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            // RESULT SCREEN
+            if (screen === 'result') {
+                const scores = getCurrentScores();
+                const { bird, tied } = determineBird(scores);
+                const { primary, secondary, tertiary } = findPrograms(scores);
+                const majors = getMajorSuggestion(primary, scores);
+                const rationale = generateRationale(scores, primary);
+
+                const imageElements = {
+                    bird: bird,
+                    gown: GOWN_COLORS[primary],
+                    programAccessory: PROGRAM_ACCESSORIES[primary],
+                    exchange: PHASE2_QUESTIONS[0].options[phase2Answers.L1]?.tag || null,
+                    club: Array.isArray(phase2Answers.L2)
+                        ? phase2Answers.L2.map(i => PHASE2_QUESTIONS[1].options[i]?.tag).filter(Boolean)
+                        : PHASE2_QUESTIONS[1].options[phase2Answers.L2]?.tag ? [PHASE2_QUESTIONS[1].options[phase2Answers.L2].tag] : [],
+                    sport: Array.isArray(phase2Answers.L3)
+                        ? phase2Answers.L3.map(i => PHASE2_QUESTIONS[2].options[i]?.tag).filter(Boolean)
+                        : PHASE2_QUESTIONS[2].options[phase2Answers.L3]?.tag ? [PHASE2_QUESTIONS[2].options[phase2Answers.L3].tag] : [],
+                    sideQuest: phase2Answers['L4'] !== undefined ? PHASE2_QUESTIONS[3].options[phase2Answers['L4']]?.tag : null,
+                    language: phase2Answers['L4b'] !== undefined ? PHASE2_QUESTIONS[4].options[phase2Answers['L4b']]?.tag : null
+                };
+
+                const fullData = {
+                    studentName,
+                    studentEmail,
+                    timestamp: new Date().toISOString(),
+                    allAnswers,
+                    phase2: phase2Answers,
+                    branchSelected: selectedBranch,
+                    honingPair: honingData.pair,
+                    honingQuestionsUsed: honingData.questions.map(q => q.id),
+                    totalQuestionsAnswered: questionSequence.length + Object.keys(phase2Answers).length,
+                    questionSequence: [...questionSequence, ...Object.keys(phase2Answers)],
+                    scoresAfterLayer1,
+                    scoresAfterLayer2,
+                    scoresFinal: scores,
+                    mathsProxy,
+                    bird,
+                    birdTied: tied,
+                    primaryProgram: primary,
+                    primaryMajors: Array.isArray(majors) ? majors : [majors],
+                    secondaryProgram: secondary,
+                    tertiary,
+                    rationale,
+                    imageElements
+                };
+
+                console.log('QUIZ_RESULT_JSON:', JSON.stringify(fullData, null, 2));
+
+                const birdComponent = bird === 'ibis' ? <IbisSVG /> : bird === 'turkey' ? <TurkeySVG /> : <HybridSVG />;
+                const birdName = bird === 'ibis' ? 'Bin Chicken' : bird === 'turkey' ? 'Bush Turkey' : 'Rare Hybrid';
+                const birdPersonality = bird === 'ibis'
+                    ? "Resourceful, social, endlessly adaptable. You find opportunity where others see chaos. UQ is your playground."
+                    : bird === 'turkey'
+                    ? "Bold, focused, and unstoppable. You know what you want and you build the nest to get it. UQ is your proving ground."
+                    : "Adaptable AND focused? That's a dangerous combination. UQ is your territory.";
+
+                return (
+                    <div className="container">
+                        <div className="header" onClick={handleHeaderClick}>
+                            <h1>🐦 Your Result</h1>
+                            <p>You're a {birdName}</p>
+                        </div>
+                        <div className="content result-screen">
+                            {birdComponent}
+                            <h2 className="result-heading">{studentName}, you're a {birdName}!</h2>
+                            <p className="result-subtitle">{birdPersonality}</p>
+
+                            <div className="program-box">
+                                <div className="program-label">Your Path</div>
+                                <div className="program-name">{primary}</div>
+                                {majors && <div className="program-major">Maybe majoring in {Array.isArray(majors) ? majors.join(' or ') : majors}</div>}
+                                <div className="program-headline">{PROGRAM_HEADLINES[primary]}</div>
+                            </div>
+
+                            {secondary && (
+                                <div className="secondary-program">
+                                    <div className="secondary-label">Also Worth a Look</div>
+                                    <div className="secondary-name">{secondary}</div>
+                                    <div className="secondary-copy">{PROGRAM_HEADLINES[secondary]}</div>
+                                </div>
+                            )}
+
+                            <div className="rationale-section">
+                                <div className="rationale-label">Why We Think This Suits You</div>
+                                <div className="rationale-text">{rationale}</div>
+                            </div>
+
+                            <div className="lifestyle-icons">
+                                {phase2Answers.L1 !== undefined && PHASE2_QUESTIONS[0].options[phase2Answers.L1]?.icon && (
+                                    <div className="lifestyle-badge">
+                                        {PHASE2_QUESTIONS[0].options[phase2Answers.L1].icon}
+                                        <div className="lifestyle-label">Exchange</div>
+                                    </div>
+                                )}
+                                {Array.isArray(phase2Answers.L2) && phase2Answers.L2.map(i => (
+                                    PHASE2_QUESTIONS[1].options[i]?.icon ? (
+                                        <div key={'club-'+i} className="lifestyle-badge">
+                                            {PHASE2_QUESTIONS[1].options[i].icon}
+                                            <div className="lifestyle-label">Club</div>
+                                        </div>
+                                    ) : null
+                                ))}
+                                {Array.isArray(phase2Answers.L3) && phase2Answers.L3.map(i => (
+                                    PHASE2_QUESTIONS[2].options[i]?.icon ? (
+                                        <div key={'sport-'+i} className="lifestyle-badge">
+                                            {PHASE2_QUESTIONS[2].options[i].icon}
+                                            <div className="lifestyle-label">Sport</div>
+                                        </div>
+                                    ) : null
+                                ))}
+                                {phase2Answers.L4 !== undefined && PHASE2_QUESTIONS[3].options[phase2Answers.L4]?.icon && (
+                                    <div className="lifestyle-badge">
+                                        {PHASE2_QUESTIONS[3].options[phase2Answers.L4].icon}
+                                        <div className="lifestyle-label">Quest</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="qr-placeholder">QR Code Placeholder</div>
+
+                            <div className="caveat-section">
+                                This is a fun quiz, not a crystal ball! It's a starting point for exploring your options — not a definitive answer. For real guidance, come chat to us at the BEL booth, visit <strong>study.uq.edu.au/bel</strong>, or book a free session with our Future Students team.
+                            </div>
+
+                            <div className="result-actions">
+                                <button className="btn-start-over" onClick={handleStartOver}>Start Over</button>
+                            </div>
+                        </div>
+                        {renderDebug()}
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        // Render App
+        ReactDOM.createRoot(document.getElementById('root')).render(<BELBirdQuiz />);
+    </script>
+</body>
+</html>
